@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2F360BA117692C4700D9A404"
-               BuildableName = "AVCam.app"
+               BuildableName = "noirca.app"
                BlueprintName = "noirca"
                ReferencedContainer = "container:noirca.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2F360BA117692C4700D9A404"
-            BuildableName = "AVCam.app"
+            BuildableName = "noirca.app"
             BlueprintName = "noirca"
             ReferencedContainer = "container:noirca.xcodeproj">
          </BuildableReference>
@@ -52,7 +52,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2F360BA117692C4700D9A404"
-            BuildableName = "AVCam.app"
+            BuildableName = "noirca.app"
             BlueprintName = "noirca"
             ReferencedContainer = "container:noirca.xcodeproj">
          </BuildableReference>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2F360BA117692C4700D9A404"
-            BuildableName = "AVCam.app"
+            BuildableName = "noirca.app"
             BlueprintName = "noirca"
             ReferencedContainer = "container:noirca.xcodeproj">
          </BuildableReference>

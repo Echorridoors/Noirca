@@ -1,7 +1,7 @@
 /*
-     File: AVCamViewController.m
+ File: AVCamViewController.m
  Abstract: View controller for camera interface.
-  Version: 3.1
+ Version: 3.1
  
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
@@ -132,40 +132,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		if ([session canAddInput:videoDeviceInput])
 		{
 			[session addInput:videoDeviceInput];
-//			[self setVideoDeviceInput:videoDeviceInput];
-
+			//			[self setVideoDeviceInput:videoDeviceInput];
+			
 			dispatch_async(dispatch_get_main_queue(), ^{
 				// Why are we dispatching this to the main queue?
 				// Because AVCaptureVideoPreviewLayer is the backing layer for AVCamPreviewView and UIView can only be manipulated on main thread.
 				// Note: As an exception to the above rule, it is not necessary to serialize video orientation changes on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
-  
+				
 				[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:(AVCaptureVideoOrientation)[self interfaceOrientation]];
 			});
 		}
-		
-		AVCaptureDevice *audioDevice = [[AVCaptureDevice devicesWithMediaType:AVMediaTypeAudio] firstObject];
-		AVCaptureDeviceInput *audioDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:audioDevice error:&error];
-		
-		if (error)
-		{
-			NSLog(@"%@", error);
-		}
-		
-		if ([session canAddInput:audioDeviceInput])
-		{
-			[session addInput:audioDeviceInput];
-		}
-		
-		AVCaptureMovieFileOutput *movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
-		if ([session canAddOutput:movieFileOutput])
-		{
-			[session addOutput:movieFileOutput];
-			AVCaptureConnection *connection = [movieFileOutput connectionWithMediaType:AVMediaTypeVideo];
-			if ([connection isVideoStabilizationSupported])
-				[connection setEnablesVideoStabilizationWhenAvailable:YES];
-//			[self setMovieFileOutput:movieFileOutput];
-		}
-		
+				
 		AVCaptureStillImageOutput *stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
 		if ([session canAddOutput:stillImageOutput])
 		{
@@ -213,7 +190,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 	
 	_blackScreenView.alpha = 0;
-
+	
 	_centerHorizontalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
 	_centerHorizontalGrid.frame = CGRectMake(0, screen.size.height/2, screen.size.width, 1);
 	
@@ -242,8 +219,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	dispatch_async([self sessionQueue], ^{
 		[self addObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:SessionRunningAndDeviceAuthorizedContext];
 		[self addObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:CapturingStillImageContext];
-//		[self addObserver:self forKeyPath:@"movieFileOutput.recording" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:RecordingContext];
-//		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(subjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
+		//		[self addObserver:self forKeyPath:@"movieFileOutput.recording" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:RecordingContext];
+		//		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(subjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
 		
 		__weak AVCamViewController *weakSelf = self;
 		[self setRuntimeErrorHandlingObserver:[[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureSessionRuntimeErrorNotification object:[self session] queue:nil usingBlock:^(NSNotification *note) {
@@ -263,7 +240,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	dispatch_async([self sessionQueue], ^{
 		[[self session] stopRunning];
 		
-//		[[NSNotificationCenter defaultCenter] removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
+		//		[[NSNotificationCenter defaultCenter] removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
 		[[NSNotificationCenter defaultCenter] removeObserver:[self runtimeErrorHandlingObserver]];
 		
 		[self removeObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" context:SessionRunningAndDeviceAuthorizedContext];
@@ -416,6 +393,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		
 		self.previewThing.image = imageInMemory;
 		isRendering = 0;
+		
+		[self saveImage];
 		imageInMemory = NULL;
 		
 		[checkLooper invalidate];
