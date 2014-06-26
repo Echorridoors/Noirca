@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		03FF60A4195C84B5002D4573 /* tile.png in Resources */ = {isa = PBXBuildFile; fileRef = 03FF60A3195C84B5002D4573 /* tile.png */; };
+		031B7E02195CB7FE0065963C /* icon.120.png in Resources */ = {isa = PBXBuildFile; fileRef = 031B7E01195CB7FE0065963C /* icon.120.png */; };
 		2F360BB017692C4700D9A404 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BAE17692C4700D9A404 /* InfoPlist.strings */; };
 		2F360BB217692C4700D9A404 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F360BB117692C4700D9A404 /* main.m */; };
 		2F360BB617692C4700D9A404 /* AVCamAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F360BB517692C4700D9A404 /* AVCamAppDelegate.m */; };
@@ -19,7 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		03FF60A3195C84B5002D4573 /* tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tile.png; sourceTree = "<group>"; };
+		031B7E01195CB7FE0065963C /* icon.120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.120.png; sourceTree = "<group>"; };
 		2F360BA217692C4700D9A404 /* noirca.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = noirca.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F360BAD17692C4700D9A404 /* noirca-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "noirca-Info.plist"; sourceTree = "<group>"; };
 		2F360BAF17692C4700D9A404 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -40,6 +40,7 @@
 		2F360B9917692C4700D9A404 = {
 			isa = PBXGroup;
 			children = (
+				031B7E01195CB7FE0065963C /* icon.120.png */,
 				2F90F0AD178E8C450015CE45 /* ReadMe.txt */,
 				2F360BAB17692C4700D9A404 /* AVCam */,
 				2F360BA317692C4700D9A404 /* Products */,
@@ -57,7 +58,6 @@
 		2F360BAB17692C4700D9A404 /* AVCam */ = {
 			isa = PBXGroup;
 			children = (
-				03FF60A3195C84B5002D4573 /* tile.png */,
 				2F360BB417692C4700D9A404 /* AVCamAppDelegate.h */,
 				2F360BB517692C4700D9A404 /* AVCamAppDelegate.m */,
 				2F360BBD17692C4700D9A404 /* AVCamViewController.h */,
@@ -147,7 +147,7 @@
 				2F360BB017692C4700D9A404 /* InfoPlist.strings in Resources */,
 				2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */,
 				2F45C1D6177676670052A7F9 /* Main_iPad.storyboard in Resources */,
-				03FF60A4195C84B5002D4573 /* tile.png in Resources */,
+				031B7E02195CB7FE0065963C /* icon.120.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,6 +276,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "AVCam/noirca-Info.plist";
 				PRODUCT_NAME = noirca;
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -289,6 +290,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "AVCam/noirca-Info.plist";
 				PRODUCT_NAME = noirca;
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
