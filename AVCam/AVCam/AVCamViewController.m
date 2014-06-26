@@ -49,6 +49,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
+#import <MediaPlayer/MediaPlayer.h>
 
 #import "AVCamPreviewView.h"
 
@@ -97,6 +98,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
+    
 	[self templateStart];
 	
 	// Create the AVCaptureSession
@@ -151,6 +153,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			[self setStillImageOutput:stillImageOutput];
 		}
 	});
+    [self installVolume];
 }
 
 -(void)templateStart
@@ -536,6 +539,78 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			});
 		}
 	}];
+}
+
+#pragma mark Volume Button
+
+/* Instructions:
+ 1. Add the Media player framework to your project.
+ 2. Insert following code into the controller for your shutter view.
+ 3. Add [self installVolume] to your viewdidload function
+ 4. add your shutter trigger code to the volumeChanged function
+ 5. Call uninstallVolume whenever you want to remove the volume changed notification
+ 
+ note: If the user holds the volume+ button down, the volumeChanged function will be called repeatedly, be sure to add a rate limiter if your application isn't setup to take multiple photos a second.
+ 
+ */
+
+
+
+float currentVolume; //Current Volume
+
+-(void)installVolume { /*Installs the volume button view and sets up the notifications to trigger the volumechange and the resetVolume button*/
+    MPVolumeView *volumeView = [[MPVolumeView alloc] initWithFrame:CGRectMake(-100, -100, 1, 1)];
+    volumeView.showsRouteButton = NO;
+    [self.previewView addSubview:volumeView];
+    [self.previewView sendSubviewToBack:volumeView];
+    
+    [self resetVolumeButton];
+    
+    [[NSNotificationCenter defaultCenter]
+     addObserver:self
+     selector:@selector(volumeChanged:)
+     name:@"AVSystemController_SystemVolumeDidChangeNotification"
+     object:nil];
+    
+    [[NSNotificationCenter defaultCenter]
+     addObserver:self selector:@selector(resetVolumeButton) name:UIApplicationDidBecomeActiveNotification object:nil];
+    
+    
+    
+}
+
+-(void)uninstallVolume { /*removes notifications, install when you are closing the app or the camera view*/
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:@"AVSystemController_SystemVolumeDidChangeNotification"
+                                                  object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIApplicationDidBecomeActiveNotification
+                                                  object:nil];
+}
+
+-(void)resetVolumeButton { /*gets the current volume and sets up the button, needs to be called when the app returns from background.*/
+    currentVolume=-1;
+    AVAudioPlayer* p = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"silence.wav"]] error:NULL];
+    
+    [p prepareToPlay];
+    [p stop];
+    
+    MPMusicPlayerController *volumeGetter = [MPMusicPlayerController iPodMusicPlayer];
+    
+    currentVolume = volumeGetter.volume;
+}
+
+- (void)volumeChanged:(NSNotification *)notification{
+    float volume = [[[notification userInfo] objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
+    if( [[[notification userInfo]objectForKey:@"AVSystemController_AudioVolumeChangeReasonNotificationParameter"]isEqualToString:@"ExplicitVolumeChange"]) {
+        if(volume>=currentVolume && volume>0) {
+            /* Do shutter button stuff here!*/
+            [self snapStillImage:self];
+        }
+    }
+    currentVolume=volume;
 }
 
 @end

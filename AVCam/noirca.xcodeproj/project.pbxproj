@@ -16,6 +16,8 @@
 		2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BB717692C4700D9A404 /* Main_iPhone.storyboard */; };
 		2F45C1D6177676670052A7F9 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BBA17692C4700D9A404 /* Main_iPad.storyboard */; };
 		2FDA781D176DB79700509279 /* AVCamPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FDA781C176DB79700509279 /* AVCamPreviewView.m */; };
+		580D3EFD195CC7CD00EC0E4B /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 580D3EFC195CC7CD00EC0E4B /* MediaPlayer.framework */; };
+		580D3F00195CCC5700EC0E4B /* silence.wav in Resources */ = {isa = PBXBuildFile; fileRef = 580D3EFF195CCC5700EC0E4B /* silence.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,14 +36,29 @@
 		2F90F0AD178E8C450015CE45 /* ReadMe.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
 		2FDA781B176DB79700509279 /* AVCamPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCamPreviewView.h; sourceTree = "<group>"; };
 		2FDA781C176DB79700509279 /* AVCamPreviewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVCamPreviewView.m; sourceTree = "<group>"; };
+		580D3EFC195CC7CD00EC0E4B /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		580D3EFF195CCC5700EC0E4B /* silence.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = silence.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		580D3EFB195CC7C100EC0E4B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				580D3EFD195CC7CD00EC0E4B /* MediaPlayer.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		2F360B9917692C4700D9A404 = {
 			isa = PBXGroup;
 			children = (
+				580D3EFE195CC7D800EC0E4B /* Frameworks */,
 				031B7E01195CB7FE0065963C /* icon.120.png */,
 				2F90F0AD178E8C450015CE45 /* ReadMe.txt */,
+				580D3EFF195CCC5700EC0E4B /* silence.wav */,
 				2F360BAB17692C4700D9A404 /* AVCam */,
 				2F360BA317692C4700D9A404 /* Products */,
 			);
@@ -82,6 +99,14 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		580D3EFE195CC7D800EC0E4B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				580D3EFC195CC7CD00EC0E4B /* MediaPlayer.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -91,6 +116,7 @@
 			buildPhases = (
 				2F360B9E17692C4700D9A404 /* Sources */,
 				2F360BA017692C4700D9A404 /* Resources */,
+				580D3EFB195CC7C100EC0E4B /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -143,6 +169,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				580D3F00195CCC5700EC0E4B /* silence.wav in Resources */,
 				2F360BC117692C4700D9A404 /* Images.xcassets in Resources */,
 				2F360BB017692C4700D9A404 /* InfoPlist.strings in Resources */,
 				2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */,
