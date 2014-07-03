@@ -14,7 +14,6 @@
 		2F360BBF17692C4700D9A404 /* AVCamViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F360BBE17692C4700D9A404 /* AVCamViewController.m */; };
 		2F360BC117692C4700D9A404 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BC017692C4700D9A404 /* Images.xcassets */; };
 		2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BB717692C4700D9A404 /* Main_iPhone.storyboard */; };
-		2F45C1D6177676670052A7F9 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BBA17692C4700D9A404 /* Main_iPad.storyboard */; };
 		2FDA781D176DB79700509279 /* AVCamPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FDA781C176DB79700509279 /* AVCamPreviewView.m */; };
 		580D3EFD195CC7CD00EC0E4B /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 580D3EFC195CC7CD00EC0E4B /* MediaPlayer.framework */; };
 		580D3F00195CCC5700EC0E4B /* silence.wav in Resources */ = {isa = PBXBuildFile; fileRef = 580D3EFF195CCC5700EC0E4B /* silence.wav */; };
@@ -29,7 +28,6 @@
 		2F360BB417692C4700D9A404 /* AVCamAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AVCamAppDelegate.h; sourceTree = "<group>"; };
 		2F360BB517692C4700D9A404 /* AVCamAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVCamAppDelegate.m; sourceTree = "<group>"; };
 		2F360BB817692C4700D9A404 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
-		2F360BBB17692C4700D9A404 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
 		2F360BBD17692C4700D9A404 /* AVCamViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AVCamViewController.h; sourceTree = "<group>"; };
 		2F360BBE17692C4700D9A404 /* AVCamViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVCamViewController.m; sourceTree = "<group>"; };
 		2F360BC017692C4700D9A404 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -82,7 +80,6 @@
 				2FDA781B176DB79700509279 /* AVCamPreviewView.h */,
 				2FDA781C176DB79700509279 /* AVCamPreviewView.m */,
 				2F360BB717692C4700D9A404 /* Main_iPhone.storyboard */,
-				2F360BBA17692C4700D9A404 /* Main_iPad.storyboard */,
 				2F360BC017692C4700D9A404 /* Images.xcassets */,
 				2F360BAC17692C4700D9A404 /* Supporting Files */,
 			);
@@ -173,7 +170,6 @@
 				2F360BC117692C4700D9A404 /* Images.xcassets in Resources */,
 				2F360BB017692C4700D9A404 /* InfoPlist.strings in Resources */,
 				2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */,
-				2F45C1D6177676670052A7F9 /* Main_iPad.storyboard in Resources */,
 				031B7E02195CB7FE0065963C /* icon.120.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -209,14 +205,6 @@
 				2F360BB817692C4700D9A404 /* Base */,
 			);
 			name = Main_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		2F360BBA17692C4700D9A404 /* Main_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2F360BBB17692C4700D9A404 /* Base */,
-			);
-			name = Main_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

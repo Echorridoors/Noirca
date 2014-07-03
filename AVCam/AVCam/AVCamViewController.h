@@ -60,6 +60,11 @@
 @property (strong, nonatomic) IBOutlet UIView *loadingIndicator;
 @property (strong, nonatomic) IBOutlet UIView *blackScreenView;
 
+@property (strong, nonatomic) IBOutlet UIButton *modeButton;
+@property (strong, nonatomic) IBOutlet UILabel *modeLabel;
+
+- (IBAction)modeButton:(id)sender;
+
 @end
 
 CGRect screen;

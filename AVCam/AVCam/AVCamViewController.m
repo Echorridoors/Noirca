@@ -188,6 +188,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
 	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
 	
+	_modeLabel.frame = CGRectMake(30, 0, screen.size.width-30, 30);
+	_modeLabel.text = @"Ready";
+	
+	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
+	
 	[UIView beginAnimations: @"Splash Intro" context:nil];
 	[UIView setAnimationDuration:0.5];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
@@ -613,4 +618,6 @@ float currentVolume; //Current Volume
     currentVolume=volume;
 }
 
+- (IBAction)modeButton:(id)sender {
+}
 @end

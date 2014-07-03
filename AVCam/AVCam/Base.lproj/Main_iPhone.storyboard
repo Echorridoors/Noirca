@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="vXZ-lx-hvc">
     <dependencies>
+        <deployment defaultVersion="1792" identifier="iOS"/>
         <development version="5000" identifier="xcode"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
     </dependencies>
@@ -80,6 +81,23 @@
                                     <action selector="snapStillImage:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="mhO-gK-EhH"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7Ui-1V-CBG" userLabel="modeLabel">
+                                <rect key="frame" x="139" y="274" width="42" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="AppleSDGothicNeo-Light" family="Apple SD Gothic Neo" pointSize="12"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="GzD-Lz-hXh" userLabel="modeButton">
+                                <rect key="frame" x="137" y="269" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="modeButton:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Esf-54-ffS"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
@@ -95,6 +113,8 @@
                         <outlet property="centerVerticalGridSecondary2" destination="RzA-Tl-iRV" id="IYV-Db-97M"/>
                         <outlet property="gridView" destination="Xdl-t4-4iY" id="y1i-46-gbK"/>
                         <outlet property="loadingIndicator" destination="X7P-DG-RKN" id="lVw-hX-w51"/>
+                        <outlet property="modeButton" destination="GzD-Lz-hXh" id="M7o-ge-eq9"/>
+                        <outlet property="modeLabel" destination="7Ui-1V-CBG" id="1GF-sA-5nO"/>
                         <outlet property="previewThing" destination="tSu-n3-9E1" id="s2k-Yy-Hxg"/>
                         <outlet property="previewView" destination="sVI-mX-69Q" id="UGh-um-teZ"/>
                         <outlet property="stillButton" destination="JI8-7Z-lWW" id="oT3-f6-Uvt"/>
