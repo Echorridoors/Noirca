@@ -190,6 +190,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	_modeLabel.frame = CGRectMake(30, 0, screen.size.width-30, 30);
 	_modeLabel.text = @"Ready";
+	_modeLabel.alpha = 1;
 	
 	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
 	
@@ -198,6 +199,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 	
 	_blackScreenView.alpha = 0;
+	
+	_modeLabel.alpha = 0;
 	
 	_centerHorizontalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
 	_centerHorizontalGrid.frame = CGRectMake(0, screen.size.height/2, screen.size.width, 1);
@@ -341,7 +344,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	// Disallow Click
 	if( isRendering == 1 ){
+		[self displayModeMessage:@"ready"];
 		return;
+	}
+	else{
+		[self displayModeMessage:@"ready"];
 	}
 	
 	// Remove preview image
@@ -350,6 +357,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[UIView setAnimationDuration:1];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 		_blackScreenView.alpha = 0;
+		_loadingIndicator.alpha = 1;
 		[UIView commitAnimations];
 		
 		self.previewThing.image = NULL;
@@ -359,7 +367,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_blackScreenView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
 	_blackScreenView.alpha = 0;
 	_previewThing.alpha = 0;
-	_loadingIndicator.alpha = 0;
 	
 	// Animate
 	[UIView beginAnimations: @"Splash Intro" context:nil];
@@ -382,8 +389,25 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		{
 			NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 			imageInMemory = [self getImageWithUnsaturatedPixelsOfImage:[[UIImage alloc] initWithData:imageData]];
+			
+			[self displayModeMessage:@"saved"];
+			
 		}
 	}];
+}
+
+-(void)displayModeMessage :(NSString*)message
+{
+	_modeLabel.alpha = 1;
+	_modeLabel.text = message;
+	
+	[UIView beginAnimations: @"Splash Intro" context:nil];
+	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+	[UIView setAnimationDelay:1];
+	[UIView setAnimationDuration:0.5];
+	_modeLabel.alpha = 0;
+	_loadingIndicator.alpha = 1;
+	[UIView commitAnimations];
 }
 
 -(void)checkLoop
@@ -396,7 +420,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[UIView setAnimationDuration:2];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 		_previewThing.alpha = 1;
-		_loadingIndicator.alpha = 1;
 		[UIView commitAnimations];
 		
 		self.previewThing.image = imageInMemory;
@@ -619,5 +642,31 @@ float currentVolume; //Current Volume
 }
 
 - (IBAction)modeButton:(id)sender {
+	
+	if(modeCurrent == 1){
+		
+		modeCurrent = 0;
+		
+		[self displayModeMessage:@"noir"];
+		
+		[UIView beginAnimations: @"Splash Intro" context:nil];
+		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+		[UIView setAnimationDuration:0.5];
+		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:0 alpha:1];
+		[UIView commitAnimations];
+	}
+	else{
+		
+		modeCurrent = 1;
+		[self displayModeMessage:@"grey"];
+		
+		[UIView beginAnimations: @"Splash Intro" context:nil];
+		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+		[UIView setAnimationDuration:0.5];
+		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+		[UIView commitAnimations];
+	}
+	
 }
+
 @end

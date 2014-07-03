@@ -72,14 +72,7 @@ NSTimer *blink;
 NSTimer *checkLooper;
 UIImage *imageInMemory;
 int isRendering;
-
-
-
-
-
-
-
-
+int modeCurrent;
 
 
 
