@@ -46,6 +46,8 @@
  */
 
 #import <UIKit/UIKit.h>
+#import <AudioToolbox/AudioToolbox.h>
+#import <AVFoundation/AVFoundation.h>
 
 @interface AVCamViewController : UIViewController
 @property (strong, nonatomic) IBOutlet UIImageView *previewThing;
@@ -73,6 +75,8 @@ NSTimer *checkLooper;
 UIImage *imageInMemory;
 int isRendering;
 int modeCurrent;
+
+AVAudioPlayer * audioPlayer;
 
 
 

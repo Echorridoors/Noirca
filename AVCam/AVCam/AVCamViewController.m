@@ -345,11 +345,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	// Disallow Click
 	if( isRendering == 1 ){
-		[self displayModeMessage:@"ready"];
+		[self displayModeMessage:@"wait"];
 		return;
-	}
-	else{
-		[self displayModeMessage:@"ready"];
 	}
 	
 	// Remove preview image
@@ -362,6 +359,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[UIView commitAnimations];
 		
 		self.previewThing.image = NULL;
+		
+		[self displayModeMessage:@"picture"];
 		return;
 	}
 	
@@ -397,7 +396,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 				imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];
 			}
 			
-			[self displayModeMessage:@"saved"];
+			[self displayModeMessage:@"saved to albums"];
 			
 		}
 	}];
@@ -419,7 +418,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 -(void)checkLoop
 {
-	NSLog(@"checking");
 	// Ready
 	if( imageInMemory != NULL){
 		
@@ -703,6 +701,8 @@ float currentVolume; //Current Volume
 	
 	[self toggleMode];
 	
+	[self audioPlayer:@"fx.click.wav"];
+	
 }
 
 
@@ -723,7 +723,7 @@ float currentVolume; //Current Volume
 	else{
 		
 		modeCurrent = 1;
-		[self displayModeMessage:@"grey"];
+		[self displayModeMessage:@"clair"];
 		
 		[UIView beginAnimations: @"Splash Intro" context:nil];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
@@ -732,6 +732,24 @@ float currentVolume; //Current Volume
 		[UIView commitAnimations];
 	}
 	
+}
+
+-(void)audioPlayer: (NSString *)filename;
+{
+	NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+	resourcePath = [resourcePath stringByAppendingString: [NSString stringWithFormat:@"/%@", filename] ];
+	NSError* err;
+	audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL: [NSURL fileURLWithPath:resourcePath] error:&err];
+	
+	audioPlayer.volume = 0.5;
+	audioPlayer.numberOfLoops = 0;
+	audioPlayer.currentTime = 0;
+	
+	if(err)	{ NSLog(@"%@",err); }
+	else	{
+		[audioPlayer prepareToPlay];
+		[audioPlayer play];
+	}
 }
 	
 
