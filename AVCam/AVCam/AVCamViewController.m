@@ -154,6 +154,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		}
 	});
     [self installVolume];
+	[self toggleMode];
 }
 
 -(void)templateStart
@@ -388,7 +389,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		if (imageDataSampleBuffer)
 		{
 			NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-			imageInMemory = [self getImageWithUnsaturatedPixelsOfImage:[[UIImage alloc] initWithData:imageData]];
+			
+			if(modeCurrent == 1){
+				imageInMemory = [self greyMode:[[UIImage alloc] initWithData:imageData]];
+			}
+			else{
+				imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];
+			}
 			
 			[self displayModeMessage:@"saved"];
 			
@@ -438,7 +445,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 }
 
 
--(UIImage *) getImageWithUnsaturatedPixelsOfImage:(UIImage *)image {
+-(UIImage *) greyMode:(UIImage *)image {
     const int RED = 1, GREEN = 2, BLUE = 3;
 	
     CGRect imageRect = CGRectMake(0, 0, image.size.width*2, image.size.height*2);
@@ -467,6 +474,57 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			
 			// Add a bit of Noise
 			gray = gray + (5-arc4random_uniform(10));
+			
+			// Cap
+			if(gray > 255){	gray = 255; }
+			
+            rgbaPixel[RED] = gray;
+            rgbaPixel[GREEN] = gray;
+            rgbaPixel[BLUE] = gray;
+        }
+    }
+	
+    CGImageRef newImage = CGBitmapContextCreateImage(context);
+	
+    CGContextRelease(context);
+    CGColorSpaceRelease(colorSpace);
+    free(pixels);
+	
+    UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
+    CGImageRelease(newImage);
+	
+    return resultUIImage;
+}
+
+-(UIImage *) noirMode:(UIImage *)image {
+    const int RED = 1, GREEN = 2, BLUE = 3;
+	
+    CGRect imageRect = CGRectMake(0, 0, image.size.width*2, image.size.height*2);
+	
+    int width = imageRect.size.width, height = imageRect.size.height;
+	
+    uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
+    memset(pixels, 0, width * height * sizeof(uint32_t));
+	
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+	
+    CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
+	
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+            uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
+            uint32_t gray = (0.333*rgbaPixel[RED]+0.333*rgbaPixel[GREEN]+0.333*rgbaPixel[BLUE]);
+			
+			// Remove contrast and push to white
+			float whiteContent = (float)gray/255;
+			gray = (gray * whiteContent * 0.95)-10;
+			
+			whiteContent = (float)gray/255;
+			gray = gray + (whiteContent * 80.5)+20;
+			
+			// Add a bit of Noise
+//			gray = gray + (5-arc4random_uniform(10));
 			
 			// Cap
 			if(gray > 255){	gray = 255; }
@@ -643,6 +701,13 @@ float currentVolume; //Current Volume
 
 - (IBAction)modeButton:(id)sender {
 	
+	[self toggleMode];
+	
+}
+
+
+-(void)toggleMode
+{
 	if(modeCurrent == 1){
 		
 		modeCurrent = 0;
@@ -668,5 +733,7 @@ float currentVolume; //Current Volume
 	}
 	
 }
+	
+
 
 @end
