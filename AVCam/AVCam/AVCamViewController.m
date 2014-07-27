@@ -439,6 +439,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 -(void)saveImage
 {
+	NSData *imgData = UIImageJPEGRepresentation(imageInMemory,1);
+	NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
+	
 	[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageInMemory CGImage] orientation:(ALAssetOrientation)[imageInMemory imageOrientation] completionBlock:nil];
 }
 
@@ -446,7 +449,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(UIImage *) greyMode:(UIImage *)image {
     const int RED = 1, GREEN = 2, BLUE = 3;
 	
-    CGRect imageRect = CGRectMake(0, 0, image.size.width*2, image.size.height*2);
+    CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
 	
     int width = imageRect.size.width, height = imageRect.size.height;
 	
@@ -497,7 +500,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(UIImage *) noirMode:(UIImage *)image {
     const int RED = 1, GREEN = 2, BLUE = 3;
 	
-    CGRect imageRect = CGRectMake(0, 0, image.size.width*2, image.size.height*2);
+    CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
 	
     int width = imageRect.size.width, height = imageRect.size.height;
 	
@@ -522,7 +525,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			gray = gray + (whiteContent * 80.5)+20;
 			
 			// Add a bit of Noise
-//			gray = gray + (5-arc4random_uniform(10));
+			gray = gray + (5-arc4random_uniform(10));
 			
 			// Cap
 			if(gray > 255){	gray = 255; }
@@ -637,8 +640,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
  note: If the user holds the volume+ button down, the volumeChanged function will be called repeatedly, be sure to add a rate limiter if your application isn't setup to take multiple photos a second.
  
  */
-
-
 
 float currentVolume; //Current Volume
 
