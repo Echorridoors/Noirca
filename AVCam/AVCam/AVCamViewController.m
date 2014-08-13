@@ -362,7 +362,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		
 		self.previewThing.image = NULL;
 		
-		[self displayModeMessage:@"picture"];
+		[self displayModeMessage:@""];
 		return;
 	}
 	
@@ -391,12 +391,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		{
 			NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 			
-			if(modeCurrent == 1){
-				imageInMemory = [self greyMode:[[UIImage alloc] initWithData:imageData]];
-			}
-			else{
-				imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];
-			}
+			if(modeCurrent == 1)		{ imageInMemory = [self clairMode:[[UIImage alloc] initWithData:imageData]];}
+			else if(modeCurrent == 2)	{ imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];}
+			else						{ imageInMemory = [self mateMode:[[UIImage alloc] initWithData:imageData]];}
 			
 			[self displayModeMessage:@"saved to albums"];
 			
@@ -448,25 +445,25 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 }
 
 
--(UIImage *) greyMode:(UIImage *)image {
-    const int RED = 1, GREEN = 2, BLUE = 3;
+-(UIImage *) clairMode:(UIImage *)image {
+	const int RED = 1, GREEN = 2, BLUE = 3;
 	
-    CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
 	
-    int width = imageRect.size.width, height = imageRect.size.height;
+	int width = imageRect.size.width, height = imageRect.size.height;
 	
-    uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
-    memset(pixels, 0, width * height * sizeof(uint32_t));
+	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
+	memset(pixels, 0, width * height * sizeof(uint32_t));
 	
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
 	
-    CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
+	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
 	
-    for(int y = 0; y < height; y++) {
-        for(int x = 0; x < width; x++) {
-            uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-            uint32_t gray = (0.333*rgbaPixel[RED]+0.333*rgbaPixel[GREEN]+0.333*rgbaPixel[BLUE]);
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
+			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
+			uint32_t gray = (0.45*rgbaPixel[RED]+0.45*rgbaPixel[GREEN]+0.0*rgbaPixel[BLUE]);
 			
 			// Remove contrast and push to white
 			float whiteContent = (float)gray/255;
@@ -475,79 +472,139 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			whiteContent = (float)gray/255;
 			gray = gray + (whiteContent * 90.5);
 			
-			// Add a bit of Noise
-			gray = gray + (5-arc4random_uniform(10));
-			
 			// Cap
 			if(gray > 255){	gray = 255; }
 			
-            rgbaPixel[RED] = gray;
-            rgbaPixel[GREEN] = gray;
-            rgbaPixel[BLUE] = gray;
-        }
-    }
+			rgbaPixel[RED] = gray;
+			rgbaPixel[GREEN] = gray;
+			rgbaPixel[BLUE] = gray;
+		}
+	}
 	
-    CGImageRef newImage = CGBitmapContextCreateImage(context);
+	CGImageRef newImage = CGBitmapContextCreateImage(context);
 	
-    CGContextRelease(context);
-    CGColorSpaceRelease(colorSpace);
-    free(pixels);
+	CGContextRelease(context);
+	CGColorSpaceRelease(colorSpace);
+	free(pixels);
 	
-    UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
-    CGImageRelease(newImage);
+	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
+	CGImageRelease(newImage);
 	
-    return resultUIImage;
+	return resultUIImage;
 }
 
 -(UIImage *) noirMode:(UIImage *)image {
-    const int RED = 1, GREEN = 2, BLUE = 3;
+	const int RED = 1, GREEN = 2, BLUE = 3;
 	
-    CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
 	
-    int width = imageRect.size.width, height = imageRect.size.height;
+	int width = imageRect.size.width, height = imageRect.size.height;
 	
-    uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
-    memset(pixels, 0, width * height * sizeof(uint32_t));
+	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
+	memset(pixels, 0, width * height * sizeof(uint32_t));
 	
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
 	
-    CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
+	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
 	
-    for(int y = 0; y < height; y++) {
-        for(int x = 0; x < width; x++) {
-            uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-            uint32_t gray = (0.333*rgbaPixel[RED]+0.333*rgbaPixel[GREEN]+0.333*rgbaPixel[BLUE]);
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
+			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
+			uint32_t gray = (0.0*rgbaPixel[RED]+0.0*rgbaPixel[GREEN]+0.9*rgbaPixel[BLUE]);
+			
+			float grayFloat = gray;
 			
 			// Remove contrast and push to white
-			float whiteContent = (float)gray/255;
-			gray = (gray * whiteContent * 0.95)-10;
+			float whiteContent = (float)grayFloat/255;
+			grayFloat = (grayFloat * whiteContent * 1.85)+60;
 			
-			whiteContent = (float)gray/255;
-			gray = gray + (whiteContent * 80.5)+20;
+			whiteContent = (float)grayFloat/255;
+			grayFloat = grayFloat + (whiteContent * 200.5)-40;
 			
-			// Add a bit of Noise
-			gray = gray + (5-arc4random_uniform(10));
+			grayFloat *= 0.35;
+			grayFloat += 10;
 			
 			// Cap
-			if(gray > 255){	gray = 255; }
+			if(grayFloat > 255){ grayFloat = 255; }
+			if(grayFloat < 0){ grayFloat = 30; }
 			
-            rgbaPixel[RED] = gray;
-            rgbaPixel[GREEN] = gray;
-            rgbaPixel[BLUE] = gray;
-        }
-    }
+			gray = (int)grayFloat;
+			
+			rgbaPixel[RED] = gray;
+			rgbaPixel[GREEN] = gray;
+			rgbaPixel[BLUE] = gray;
+		}
+	}
 	
-    CGImageRef newImage = CGBitmapContextCreateImage(context);
+	CGImageRef newImage = CGBitmapContextCreateImage(context);
 	
-    CGContextRelease(context);
-    CGColorSpaceRelease(colorSpace);
-    free(pixels);
+	CGContextRelease(context);
+	CGColorSpaceRelease(colorSpace);
+	free(pixels);
 	
-    UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
-    CGImageRelease(newImage);
+	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
+	CGImageRelease(newImage);
 	
-    return resultUIImage;
+	return resultUIImage;
+}
+
+-(UIImage *) mateMode:(UIImage *)image {
+	const int RED = 1, GREEN = 2, BLUE = 3;
+	
+	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+	
+	int width = imageRect.size.width, height = imageRect.size.height;
+	
+	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
+	memset(pixels, 0, width * height * sizeof(uint32_t));
+	
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+	
+	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
+	
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
+			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
+			uint32_t gray = (0.3*rgbaPixel[RED]+0.0*rgbaPixel[GREEN]+0.3*rgbaPixel[BLUE]);
+			
+			float grayFloat = gray;
+			
+			// Remove contrast and push to white
+			float whiteContent = (float)grayFloat/255;
+			grayFloat = (grayFloat * whiteContent * 1.25)+40;
+			
+			
+			// Push back down
+			whiteContent = (float)grayFloat/255;
+			grayFloat = grayFloat + (whiteContent * 70.5)-30;
+			
+			grayFloat *= 1.55;
+			
+			// Cap
+			if(grayFloat > 255){ grayFloat = 255; }
+			if(grayFloat < 0){ grayFloat = 30; }
+			
+			gray = (int)grayFloat;
+			
+			rgbaPixel[RED] = gray;
+			rgbaPixel[GREEN] = gray;
+			rgbaPixel[BLUE] = gray;
+			
+		}
+	}
+	
+	CGImageRef newImage = CGBitmapContextCreateImage(context);
+	
+	CGContextRelease(context);
+	CGColorSpaceRelease(colorSpace);
+	free(pixels);
+	
+	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
+	CGImageRelease(newImage);
+	
+	return resultUIImage;
 }
 
 #pragma mark File Output Delegate
@@ -711,9 +768,20 @@ float currentVolume; //Current Volume
 
 -(void)toggleMode
 {
-	if(modeCurrent == 1){
+	modeCurrent += 1;
+	if( modeCurrent > 2 ){ modeCurrent = 0; }
+	
+	if(modeCurrent == 0){
 		
-		modeCurrent = 0;
+		[self displayModeMessage:@"clair"];
+		
+		[UIView beginAnimations: @"Splash Intro" context:nil];
+		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+		[UIView setAnimationDuration:0.5];
+		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+		[UIView commitAnimations];
+	}
+	if(modeCurrent == 1){
 		
 		[self displayModeMessage:@"noir"];
 		
@@ -723,15 +791,14 @@ float currentVolume; //Current Volume
 		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:0 alpha:1];
 		[UIView commitAnimations];
 	}
-	else{
+	if(modeCurrent == 2){
 		
-		modeCurrent = 1;
-		[self displayModeMessage:@"clair"];
+		[self displayModeMessage:@"mate"];
 		
 		[UIView beginAnimations: @"Splash Intro" context:nil];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 		[UIView setAnimationDuration:0.5];
-		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:0.5 alpha:1];
 		[UIView commitAnimations];
 	}
 	
