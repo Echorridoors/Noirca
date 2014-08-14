@@ -157,7 +157,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[self toggleMode];
 	
 	[self apiContact:@"noirca":@"analytics":@"launch":@"1"];
-	[self changeLensPosition:0];
+	
+	// Ready for iOS8
+	//	[self changeLensPosition:0];
 }
 
 -(void)templateStart
@@ -360,6 +362,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 }
 
+#pragma mark Touch
+
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	UITouch *theTouch = [touches anyObject];
@@ -376,23 +380,24 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	float test = (touchLocation.y/self.view.frame.size.height);
 	
-	
 	NSLog(@"%f",test);
 	
-	[self changeLensPosition:test];
+	// Ready for iOS8
+//	[self changeLensPosition:test];
 	
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *theTouch = [touches anyObject];
-	CGPoint endPoint = [theTouch locationInView:self.view];
+	
+	[self takePicture];
+	
 }
 
-- (IBAction)snapStillImage:(id)sender
+#pragma mark Picture
+
+-(void)takePicture
 {
-	
-	return;
-	
 	CGRect screen = [[UIScreen mainScreen] bounds];
 	
 	// Disallow Click
@@ -451,6 +456,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}];
 }
 
+- (IBAction)snapStillImage:(id)sender
+{
+}
+
 -(void)displayModeMessage :(NSString*)message
 {
 	_modeLabel.alpha = 1;
@@ -494,6 +503,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageInMemory CGImage] orientation:(ALAssetOrientation)[imageInMemory imageOrientation] completionBlock:nil];
 }
 
+#pragma mark Filters
 
 -(UIImage *) clairMode:(UIImage *)image {
 	const int RED = 1, GREEN = 2, BLUE = 3;
