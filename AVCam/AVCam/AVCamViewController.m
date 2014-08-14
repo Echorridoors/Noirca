@@ -61,11 +61,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 // For use in the storyboards.
 @property (nonatomic, weak) IBOutlet AVCamPreviewView *previewView;
-@property (nonatomic, weak) IBOutlet UIButton *recordButton;
-@property (nonatomic, weak) IBOutlet UIButton *cameraButton;
-@property (nonatomic, weak) IBOutlet UIButton *stillButton;
-
-- (IBAction)snapStillImage:(id)sender;
 
 // Session management.
 @property (nonatomic) dispatch_queue_t sessionQueue; // Communicate with the session and other session objects on this queue.
@@ -245,7 +240,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			dispatch_async([strongSelf sessionQueue], ^{
 				// Manually restarting the session since it must have been stopped due to an error.
 				[[strongSelf session] startRunning];
-				[[strongSelf recordButton] setTitle:NSLocalizedString(@"Record", @"Recording button record title") forState:UIControlStateNormal];
 			});
 		}]];
 		[[self session] startRunning];
@@ -305,15 +299,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		dispatch_async(dispatch_get_main_queue(), ^{
 			if (isRecording)
 			{
-				[[self cameraButton] setEnabled:NO];
-				[[self recordButton] setTitle:NSLocalizedString(@"Stop", @"Recording button stop title") forState:UIControlStateNormal];
-				[[self recordButton] setEnabled:YES];
 			}
 			else
 			{
-				[[self cameraButton] setEnabled:YES];
-				[[self recordButton] setTitle:NSLocalizedString(@"Record", @"Recording button record title") forState:UIControlStateNormal];
-				[[self recordButton] setEnabled:YES];
 			}
 		});
 	}
@@ -324,15 +312,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		dispatch_async(dispatch_get_main_queue(), ^{
 			if (isRunning)
 			{
-				[[self cameraButton] setEnabled:YES];
-				[[self recordButton] setEnabled:YES];
-				[[self stillButton] setEnabled:YES];
 			}
 			else
 			{
-				[[self cameraButton] setEnabled:NO];
-				[[self recordButton] setEnabled:NO];
-				[[self stillButton] setEnabled:NO];
 			}
 		});
 	}
@@ -367,8 +349,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	UITouch *theTouch = [touches anyObject];
-	startPoint = [theTouch locationInView:self.testView];
-	CGPoint touchLocation = [theTouch locationInView:self.testView];
+	startPoint = [theTouch locationInView:self.focusView];
+	CGPoint touchLocation = [theTouch locationInView:self.focusView];
 	
 	NSLog(@"%f",touchLocation.y);
 	
@@ -376,7 +358,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *theTouch = [touches anyObject];
-	CGPoint touchLocation = [theTouch locationInView:self.testView];
+	CGPoint touchLocation = [theTouch locationInView:self.focusView];
 	
 	float test = (touchLocation.y/self.view.frame.size.height);
 	
@@ -388,10 +370,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	UITouch *theTouch = [touches anyObject];
-	
 	[self takePicture];
-	
 }
 
 #pragma mark Picture
@@ -399,6 +378,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(void)takePicture
 {
 	CGRect screen = [[UIScreen mainScreen] bounds];
+	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
 	
 	// Disallow Click
 	if( isRendering == 1 ){
@@ -417,7 +397,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		
 		self.previewThing.image = NULL;
 		
-		[self displayModeMessage:@""];
+		[self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
 		return;
 	}
 	
@@ -450,10 +430,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			else if(modeCurrent == 2)	{ imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];}
 			else						{ imageInMemory = [self mateMode:[[UIImage alloc] initWithData:imageData]];}
 			
-			[self displayModeMessage:@"saved to albums"];
+			[self displayModeMessage:@"saved"];
 			
 		}
 	}];
+	
+	// save
+	[[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
 }
 
 - (IBAction)snapStillImage:(id)sender

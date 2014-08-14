@@ -70,17 +70,6 @@
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="JI8-7Z-lWW" userLabel="captureButton">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                <state key="normal">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="snapStillImage:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="mhO-gK-EhH"/>
-                                </connections>
-                            </button>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7Ui-1V-CBG" userLabel="modeLabel">
                                 <rect key="frame" x="139" y="274" width="42" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -88,6 +77,10 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <view contentMode="scaleToFill" id="DgJ-d9-Bn7" userLabel="focusView">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="GzD-Lz-hXh" userLabel="modeButton">
                                 <rect key="frame" x="137" y="269" width="46" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -98,10 +91,6 @@
                                     <action selector="modeButton:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Esf-54-ffS"/>
                                 </connections>
                             </button>
-                            <view contentMode="scaleToFill" id="DgJ-d9-Bn7" userLabel="testView">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </view>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
@@ -115,14 +104,13 @@
                         <outlet property="centerVerticalGrid" destination="jqU-t5-1kd" id="AII-G2-BW3"/>
                         <outlet property="centerVerticalGridSecondary1" destination="mRr-ba-Sbj" id="G4u-bY-RGr"/>
                         <outlet property="centerVerticalGridSecondary2" destination="RzA-Tl-iRV" id="IYV-Db-97M"/>
+                        <outlet property="focusView" destination="DgJ-d9-Bn7" id="P4d-9L-8kt"/>
                         <outlet property="gridView" destination="Xdl-t4-4iY" id="y1i-46-gbK"/>
                         <outlet property="loadingIndicator" destination="X7P-DG-RKN" id="lVw-hX-w51"/>
                         <outlet property="modeButton" destination="GzD-Lz-hXh" id="M7o-ge-eq9"/>
                         <outlet property="modeLabel" destination="7Ui-1V-CBG" id="1GF-sA-5nO"/>
                         <outlet property="previewThing" destination="tSu-n3-9E1" id="s2k-Yy-Hxg"/>
                         <outlet property="previewView" destination="sVI-mX-69Q" id="UGh-um-teZ"/>
-                        <outlet property="stillButton" destination="JI8-7Z-lWW" id="oT3-f6-Uvt"/>
-                        <outlet property="testView" destination="DgJ-d9-Bn7" id="q8L-8z-yP1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>

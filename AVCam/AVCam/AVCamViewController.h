@@ -64,7 +64,7 @@
 
 @property (strong, nonatomic) IBOutlet UIButton *modeButton;
 @property (strong, nonatomic) IBOutlet UILabel *modeLabel;
-@property (strong, nonatomic) IBOutlet UIView *testView;
+@property (strong, nonatomic) IBOutlet UIView *focusView;
 
 - (IBAction)modeButton:(id)sender;
 
