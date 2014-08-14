@@ -70,7 +70,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 // Session management.
 @property (nonatomic) dispatch_queue_t sessionQueue; // Communicate with the session and other session objects on this queue.
 @property (nonatomic) AVCaptureSession *session;
-//@property (nonatomic) AVCaptureDeviceInput *videoDeviceInput;
+@property (nonatomic) AVCaptureDevice *videoDevice;
 //@property (nonatomic) AVCaptureMovieFileOutput *movieFileOutput;
 @property (nonatomic) AVCaptureStillImageOutput *stillImageOutput;
 
@@ -123,8 +123,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		
 		NSError *error = nil;
 		
-		AVCaptureDevice *videoDevice = [AVCamViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:AVCaptureDevicePositionBack];
-		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
+		_videoDevice = [AVCamViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:AVCaptureDevicePositionBack];
+		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:_videoDevice error:&error];
 		
 		if (error)
 		{
@@ -157,6 +157,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[self toggleMode];
 	
 	[self apiContact:@"noirca":@"analytics":@"launch":@"1"];
+	[self changeLensPosition:0];
 }
 
 -(void)templateStart
@@ -341,8 +342,57 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 #pragma mark Actions
 
+- (void)changeLensPosition:(float)focalDistance
+{
+	NSError *error = nil;
+	
+	if ([_videoDevice lockForConfiguration:&error])
+	{
+#ifdef __IPHONE_8_0
+		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+		[_videoDevice setFocusModeLockedWithLensPosition:focalDistance completionHandler:nil];
+#endif
+		
+	}
+	else
+	{
+		NSLog(@"%@", error);
+	}
+}
+
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	UITouch *theTouch = [touches anyObject];
+	startPoint = [theTouch locationInView:self.testView];
+	CGPoint touchLocation = [theTouch locationInView:self.testView];
+	
+	NSLog(@"%f",touchLocation.y);
+	
+}
+
+- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	UITouch *theTouch = [touches anyObject];
+	CGPoint touchLocation = [theTouch locationInView:self.testView];
+	
+	float test = (touchLocation.y/self.view.frame.size.height);
+	
+	
+	NSLog(@"%f",test);
+	
+	[self changeLensPosition:test];
+	
+}
+
+- (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	UITouch *theTouch = [touches anyObject];
+	CGPoint endPoint = [theTouch locationInView:self.view];
+}
+
 - (IBAction)snapStillImage:(id)sender
 {
+	
+	return;
+	
 	CGRect screen = [[UIScreen mainScreen] bounds];
 	
 	// Disallow Click

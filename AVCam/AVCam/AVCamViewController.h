@@ -64,6 +64,7 @@
 
 @property (strong, nonatomic) IBOutlet UIButton *modeButton;
 @property (strong, nonatomic) IBOutlet UILabel *modeLabel;
+@property (strong, nonatomic) IBOutlet UIView *testView;
 
 - (IBAction)modeButton:(id)sender;
 
@@ -75,6 +76,7 @@ NSTimer *checkLooper;
 UIImage *imageInMemory;
 int isRendering;
 int modeCurrent;
+CGPoint startPoint;
 
 AVAudioPlayer * audioPlayer;
 
