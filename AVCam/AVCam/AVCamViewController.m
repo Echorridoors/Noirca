@@ -93,7 +93,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-    
+	
+	modeCurrent = 2;
+	
 	[self templateStart];
 	
 	// Create the AVCaptureSession
@@ -426,8 +428,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		{
 			NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 			
-			if(modeCurrent == 1)		{ imageInMemory = [self clairMode:[[UIImage alloc] initWithData:imageData]];}
-			else if(modeCurrent == 2)	{ imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];}
+			NSLog(@"Current Mode: %d",modeCurrent);
+			
+			if(modeCurrent == 0)		{ imageInMemory = [self clairMode:[[UIImage alloc] initWithData:imageData]];}
+			else if(modeCurrent == 1)	{ imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];}
 			else						{ imageInMemory = [self mateMode:[[UIImage alloc] initWithData:imageData]];}
 			
 			[self displayModeMessage:@"saved"];
@@ -506,17 +510,25 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t gray = (0.45*rgbaPixel[RED]+0.45*rgbaPixel[GREEN]+0.0*rgbaPixel[BLUE]);
+			uint32_t gray = (0.0*rgbaPixel[RED]+0.0*rgbaPixel[GREEN]+0.9*rgbaPixel[BLUE]);
+			
+			float grayFloat = gray;
 			
 			// Remove contrast and push to white
-			float whiteContent = (float)gray/255;
-			gray = (gray * whiteContent * 0.85)+30;
+			float whiteContent = (float)grayFloat/255;
+			grayFloat = (grayFloat * whiteContent * 1.85)+60;
 			
-			whiteContent = (float)gray/255;
-			gray = gray + (whiteContent * 90.5);
+			whiteContent = (float)grayFloat/255;
+			grayFloat = grayFloat + (whiteContent * 200.5)-40;
+			
+			grayFloat *= 0.35;
+			grayFloat += 10;
 			
 			// Cap
-			if(gray > 255){	gray = 255; }
+			if(grayFloat > 255){ grayFloat = 255; }
+			if(grayFloat < 0){ grayFloat = 30; }
+			
+			gray = (int)grayFloat;
 			
 			rgbaPixel[RED] = gray;
 			rgbaPixel[GREEN] = gray;
@@ -554,23 +566,26 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t gray = (0.0*rgbaPixel[RED]+0.0*rgbaPixel[GREEN]+0.9*rgbaPixel[BLUE]);
+			uint32_t gray = (0.0*rgbaPixel[RED]+0.4*rgbaPixel[GREEN]+0.5*rgbaPixel[BLUE]);
 			
 			float grayFloat = gray;
 			
 			// Remove contrast and push to white
 			float whiteContent = (float)grayFloat/255;
-			grayFloat = (grayFloat * whiteContent * 1.85)+60;
-			
+			grayFloat = (grayFloat * whiteContent * 1.25);
+//
 			whiteContent = (float)grayFloat/255;
-			grayFloat = grayFloat + (whiteContent * 200.5)-40;
+			grayFloat = grayFloat + (whiteContent * 100);
 			
-			grayFloat *= 0.35;
+			grayFloat *= 0.85;
 			grayFloat += 10;
 			
 			// Cap
+			if(grayFloat < 0){ grayFloat = 0; }
+			grayFloat *= 1.75;
 			if(grayFloat > 255){ grayFloat = 255; }
-			if(grayFloat < 0){ grayFloat = 30; }
+			grayFloat *= 0.5;
+			if(grayFloat < 0){ grayFloat = 0; }
 			
 			gray = (int)grayFloat;
 			
@@ -610,30 +625,27 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t gray = (0.3*rgbaPixel[RED]+0.0*rgbaPixel[GREEN]+0.3*rgbaPixel[BLUE]);
+			uint32_t gray = (0.0*rgbaPixel[RED]+0.4*rgbaPixel[GREEN]+0.5*rgbaPixel[BLUE]);
 			
-			float grayFloat = gray;
+			rgbaPixel[RED] = (rgbaPixel[RED]*0.0) + (rgbaPixel[GREEN]*0.4) + (rgbaPixel[BLUE]*0.4);
+			rgbaPixel[GREEN] = (rgbaPixel[RED]*0.6) + (rgbaPixel[GREEN]*0.15) + (rgbaPixel[BLUE]*0.15);
+			rgbaPixel[BLUE] = (rgbaPixel[RED]*0.1) + (rgbaPixel[GREEN]*0.7) + (rgbaPixel[BLUE]*0.1);
 			
-			// Remove contrast and push to white
-			float whiteContent = (float)grayFloat/255;
-			grayFloat = (grayFloat * whiteContent * 1.25)+40;
+			gray = ( (rgbaPixel[RED]*1)+(rgbaPixel[GREEN]*1)+(rgbaPixel[BLUE]*1) );
 			
+			float grayFloat = ( (rgbaPixel[RED]*1)+(rgbaPixel[GREEN]*1)+(rgbaPixel[BLUE]*1) );
 			
-			// Push back down
-			whiteContent = (float)grayFloat/255;
-			grayFloat = grayFloat + (whiteContent * 70.5)-30;
+			if(grayFloat > 255){
+				grayFloat = 255-grayFloat;
+				grayFloat = (int)grayFloat+255;
+			}
+			if(grayFloat < 0){
+				grayFloat = 255-grayFloat;
+			}
 			
-			grayFloat *= 1.55;
-			
-			// Cap
-			if(grayFloat > 255){ grayFloat = 255; }
-			if(grayFloat < 0){ grayFloat = 30; }
-			
-			gray = (int)grayFloat;
-			
-			rgbaPixel[RED] = gray;
-			rgbaPixel[GREEN] = gray;
-			rgbaPixel[BLUE] = gray;
+			rgbaPixel[RED] = grayFloat;
+			rgbaPixel[GREEN] = grayFloat;
+			rgbaPixel[BLUE] = grayFloat;
 			
 		}
 	}
