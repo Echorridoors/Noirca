@@ -432,7 +432,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			
 			if(modeCurrent == 0)		{ imageInMemory = [self clairMode:[[UIImage alloc] initWithData:imageData]];}
 			else if(modeCurrent == 1)	{ imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];}
-			else						{ imageInMemory = [self mateMode:[[UIImage alloc] initWithData:imageData]];}
+			else						{ imageInMemory = [self adamantMode:[[UIImage alloc] initWithData:imageData]];}
 			
 			[self displayModeMessage:@"saved"];
 			
@@ -607,7 +607,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	return resultUIImage;
 }
 
--(UIImage *) mateMode:(UIImage *)image {
+-(UIImage *) adamantMode:(UIImage *)image {
 	const int RED = 1, GREEN = 2, BLUE = 3;
 	
 	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
@@ -820,11 +820,18 @@ float currentVolume; //Current Volume
 	
 }
 
-
 -(void)toggleMode
 {
+	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
+	
 	modeCurrent += 1;
-	if( modeCurrent > 2 ){ modeCurrent = 0; }
+	
+	if(pictureCount > 50){
+		if( modeCurrent > 2 ){ modeCurrent = 0; }
+	}
+	else{
+		if( modeCurrent > 1 ){ modeCurrent = 0; }
+	}
 	
 	if(modeCurrent == 0){
 		
@@ -848,7 +855,7 @@ float currentVolume; //Current Volume
 	}
 	if(modeCurrent == 2){
 		
-		[self displayModeMessage:@"mate"];
+		[self displayModeMessage:@"adamant"];
 		
 		[UIView beginAnimations: @"Splash Intro" context:nil];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
