@@ -49,6 +49,10 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
+#import <ImageIO/CGImageSource.h>
+#import <ImageIO/CGImageProperties.h>
+
+
 #import <MediaPlayer/MediaPlayer.h>
 
 #import "AVCamPreviewView.h"
@@ -100,6 +104,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	// Create the AVCaptureSession
 	AVCaptureSession *session = [[AVCaptureSession alloc] init];
+    session.sessionPreset = AVCaptureSessionPresetPhoto; //gets best image quality
 	[self setSession:session];
 	
 	// Setup the preview view
@@ -280,7 +285,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
-	[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:(AVCaptureVideoOrientation)toInterfaceOrientation];
+	[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -418,9 +423,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	// Save
 	isRendering = 1;
 	
-	checkLooper = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(checkLoop) userInfo:nil repeats:YES];
+	//checkLooper = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(checkLoop) userInfo:nil repeats:YES];
 	
-	[[[self stillImageOutput] connectionWithMediaType:AVMediaTypeVideo] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+	[[[self stillImageOutput] connectionWithMediaType:AVMediaTypeVideo] setVideoOrientation:AVCaptureVideoOrientationPortrait];
 	
 	[[self stillImageOutput] captureStillImageAsynchronouslyFromConnection:[[self stillImageOutput] connectionWithMediaType:AVMediaTypeVideo] completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
 		
@@ -428,19 +433,53 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		{
 			NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 			
+            CFDictionaryRef metaDict = CMCopyDictionaryOfAttachments(NULL, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
+            
+            EXIF = (__bridge NSDictionary*)metaDict;
+            
+            //CFMutableDictionaryRef mutable = CFDictionaryCreateMutableCopy(NULL, 0, metaDict);
+            
+            //NSMutableDictionary *EXIFDictionary = (__bridge NSMutableDictionary*)CFDictionaryGetValue(mutable, kCGImagePropertyExifDictionary);
+            
+            
+            
+            imageInMemory = [[UIImage alloc] initWithData:imageData];
+            previewImage = [self imageScaledToScreen:imageInMemory];
+            
 			NSLog(@"Current Mode: %d",modeCurrent);
 			
-			if(modeCurrent == 0)		{ imageInMemory = [self clairMode:[[UIImage alloc] initWithData:imageData]];}
-			else if(modeCurrent == 1)	{ imageInMemory = [self noirMode:[[UIImage alloc] initWithData:imageData]];}
-			else						{ imageInMemory = [self adamantMode:[[UIImage alloc] initWithData:imageData]];}
+			if(modeCurrent == 0)		{ previewImage = [self clairMode:previewImage];}
+			else if(modeCurrent == 1)	{ previewImage = [self noirMode:previewImage];}
+			else						{ previewImage = [self adamantMode:previewImage];}
 			
 			[self displayModeMessage:@"saved"];
+            [self checkLoop];
 			
 		}
 	}];
 	
 	// save
 	[[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
+}
+
+-(UIImage*)imageScaledToScreen: (UIImage*) sourceImage
+{
+    CGSize bounds = sourceImage.size;
+    float oldHeight = sourceImage.size.height;
+    float screenHeight =[[UIScreen mainScreen] bounds].size.height*[[UIScreen mainScreen] scale];
+    float scaleFactor = screenHeight / oldHeight;
+    
+    float newWidth = sourceImage.size.width * scaleFactor;
+    float newHeight = screenHeight;
+    
+    UIGraphicsBeginImageContext(CGSizeMake(newWidth, newHeight));
+    [sourceImage drawInRect:CGRectMake(0, 0, newWidth, newHeight)];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+    /*return [UIImage imageWithCGImage:[newImage CGImage]
+                               scale:1.0
+                         orientation: UIImageOrientationRight];*/
 }
 
 - (IBAction)snapStillImage:(id)sender
@@ -472,22 +511,66 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		_previewThing.alpha = 1;
 		[UIView commitAnimations];
 		
-		self.previewThing.image = imageInMemory;
-		isRendering = 0;
+		self.previewThing.image = previewImage;
 		
-		[self saveImage];
+        
+        [self saveImage:imageInMemory withMode:modeCurrent andEXIF:EXIF];
 		imageInMemory = NULL;
+        isRendering = 0;
+        
 		
-		[checkLooper invalidate];
+		//[checkLooper invalidate];
 	}
 }
 
--(void)saveImage
+- (UIImage *)reorient:(UIImage*)image {
+    return image;
+    return [UIImage imageWithCGImage:image.CGImage scale:image.scale orientation:UIImageOrientationUp];;
+        CGSize size = image.size;
+        UIGraphicsBeginImageContext(CGSizeMake(size.height, size.width));
+        [[UIImage imageWithCGImage:[image CGImage] scale:1.0 orientation:UIImageOrientationRight] drawInRect:CGRectMake(0,0,size.height ,size.width)];
+        UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        return newImage;
+}
+
+-(void)saveImage:(UIImage*)image withMode:(int)mode andEXIF:(NSDictionary*)exifData
 {
-	NSData *imgData = UIImageJPEGRepresentation(imageInMemory,1);
-	NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
-	
-	[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageInMemory CGImage] orientation:(ALAssetOrientation)[imageInMemory imageOrientation] completionBlock:nil];
+	UIBackgroundTaskIdentifier bgTask = UIBackgroundTaskInvalid;
+    bgTask =   [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+        // Clean up any unfinished task business by marking where you
+        // stopped or ending the task outright.
+        [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+    }];
+    
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        
+        UIImage *imageToSave = image;
+        
+        
+        
+        if(mode == 0)		{ imageToSave = [self clairMode:imageToSave];}
+        else if(mode == 1)	{ imageToSave = [self noirMode:imageToSave];}
+        else						{ imageToSave = [self adamantMode:imageToSave];}
+        
+        NSData *imgData = UIImageJPEGRepresentation(imageToSave,1);
+        NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
+        
+        NSMutableDictionary *exifm = [exifData mutableCopy];
+        
+        //[exifm setObject:[NSNumber numberWithInt:6] forKey:@"Orientation"];
+        
+        [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageToSave CGImage] metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error){
+            [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+            
+        }];
+        
+        
+    });
+    
+	/*[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageInMemory CGImage] orientation:(ALAssetOrientation)[imageInMemory imageOrientation] completionBlock:nil];*/
 }
 
 #pragma mark Filters
@@ -495,8 +578,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(UIImage *) clairMode:(UIImage *)image {
 	const int RED = 1, GREEN = 2, BLUE = 3;
 	
-	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
-	
+	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
+    
 	int width = imageRect.size.width, height = imageRect.size.height;
 	
 	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
@@ -542,7 +625,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	CGColorSpaceRelease(colorSpace);
 	free(pixels);
 	
-	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
+	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
 	CGImageRelease(newImage);
 	
 	return resultUIImage;
@@ -551,8 +634,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(UIImage *) noirMode:(UIImage *)image {
 	const int RED = 1, GREEN = 2, BLUE = 3;
 	
-	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
-	
+	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
+    
 	int width = imageRect.size.width, height = imageRect.size.height;
 	
 	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
@@ -601,7 +684,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	CGColorSpaceRelease(colorSpace);
 	free(pixels);
 	
-	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
+	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
 	CGImageRelease(newImage);
 	
 	return resultUIImage;
@@ -610,8 +693,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(UIImage *) adamantMode:(UIImage *)image {
 	const int RED = 1, GREEN = 2, BLUE = 3;
 	
-	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
-	
+	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
+    
 	int width = imageRect.size.width, height = imageRect.size.height;
 	
 	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
@@ -656,7 +739,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	CGColorSpaceRelease(colorSpace);
 	free(pixels);
 	
-	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationRight];
+	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
 	CGImageRelease(newImage);
 	
 	return resultUIImage;
@@ -806,7 +889,7 @@ float currentVolume; //Current Volume
     if( [[[notification userInfo]objectForKey:@"AVSystemController_AudioVolumeChangeReasonNotificationParameter"]isEqualToString:@"ExplicitVolumeChange"]) {
         if(volume>=currentVolume && volume>0) {
             /* Do shutter button stuff here!*/
-            [self snapStillImage:self];
+            [self takePicture];
         }
     }
     currentVolume=volume;
