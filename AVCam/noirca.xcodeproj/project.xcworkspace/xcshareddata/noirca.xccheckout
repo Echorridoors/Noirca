@@ -5,34 +5,34 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>7E6EEF25-1361-4D0C-9C10-2CFCAF389805</string>
+	<string>E63DA307-AB86-4288-BA6A-FD6BFF7AE98A</string>
 	<key>IDESourceControlProjectName</key>
 	<string>noirca</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>C426EE83-5FD5-4D19-B0B8-182CA186DBDD</key>
-		<string>https://github.com/aliceffekt/noirca.git</string>
+		<key>E836EF07-CDAD-4F2E-9534-264DFD5CDC45</key>
+		<string>https://github.com/tekgo/noirca.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>AVCam/noirca.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>C426EE83-5FD5-4D19-B0B8-182CA186DBDD</key>
+		<key>E836EF07-CDAD-4F2E-9534-264DFD5CDC45</key>
 		<string>../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/aliceffekt/noirca.git</string>
+	<string>https://github.com/tekgo/noirca.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>C426EE83-5FD5-4D19-B0B8-182CA186DBDD</string>
+	<string>E836EF07-CDAD-4F2E-9534-264DFD5CDC45</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>C426EE83-5FD5-4D19-B0B8-182CA186DBDD</string>
+			<string>E836EF07-CDAD-4F2E-9534-264DFD5CDC45</string>
 			<key>IDESourceControlWCCName</key>
 			<string>noirca</string>
 		</dict>
