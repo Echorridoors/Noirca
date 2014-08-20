@@ -522,18 +522,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 }
 
-- (UIImage *)reorient:(UIImage*)image {
-    return image;
-    return [UIImage imageWithCGImage:image.CGImage scale:image.scale orientation:UIImageOrientationUp];;
-        CGSize size = image.size;
-        UIGraphicsBeginImageContext(CGSizeMake(size.height, size.width));
-        [[UIImage imageWithCGImage:[image CGImage] scale:1.0 orientation:UIImageOrientationRight] drawInRect:CGRectMake(0,0,size.height ,size.width)];
-        UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
-        
-        return newImage;
-}
-
 -(void)saveImage:(UIImage*)image withMode:(int)mode andEXIF:(NSDictionary*)exifData
 {
 	UIBackgroundTaskIdentifier bgTask = UIBackgroundTaskInvalid;
