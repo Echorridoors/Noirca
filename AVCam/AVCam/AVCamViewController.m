@@ -388,7 +388,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
 	
 	// Disallow Click
-	if( isRendering == 1 ){
+	if( isRendering > 1 ){  //disallow if the user has already taken 2 images
 		[self displayModeMessage:@"wait"];
 		return;
 	}
@@ -421,7 +421,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[UIView commitAnimations];
 	
 	// Save
-	isRendering = 1;
+	isRendering++;
 	
 	//checkLooper = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(checkLoop) userInfo:nil repeats:YES];
 	
@@ -452,7 +452,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			else if(modeCurrent == 1)	{ previewImage = [self noirMode:previewImage];}
 			else						{ previewImage = [self adamantMode:previewImage];}
 			
-			[self displayModeMessage:@"saved"];
             [self checkLoop];
 			
 		}
@@ -516,7 +515,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         
         [self saveImage:imageInMemory withMode:modeCurrent andEXIF:EXIF];
 		imageInMemory = NULL;
-        isRendering = 0;
+        
         
 		
 		//[checkLooper invalidate];
@@ -566,6 +565,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             [[UIApplication sharedApplication] endBackgroundTask:bgTask];
             
         }];
+        [self performSelectorOnMainThread:@selector(displayModeMessage:) withObject:@"Saved" waitUntilDone:NO];
+        isRendering--;
         
         
     });
