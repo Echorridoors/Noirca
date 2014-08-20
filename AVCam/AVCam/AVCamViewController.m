@@ -162,6 +162,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	// Ready for iOS8
 	//	[self changeLensPosition:0];
+    
+    queue = dispatch_queue_create("com.XXIIVV.SaveImageQueue", NULL);
 }
 
 -(void)templateStart
@@ -388,7 +390,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
 	
 	// Disallow Click
-	if( isRendering > 1 ){  //disallow if the user has already taken 2 images
+	if( isRendering > 2 ){  //disallow if the user has already taken 3 images
 		[self displayModeMessage:@"wait"];
 		return;
 	}
@@ -442,9 +444,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             //NSMutableDictionary *EXIFDictionary = (__bridge NSMutableDictionary*)CFDictionaryGetValue(mutable, kCGImagePropertyExifDictionary);
             
             
-            
-            imageInMemory = [[UIImage alloc] initWithData:imageData];
-            previewImage = [self imageScaledToScreen:imageInMemory];
+            currentImageData = imageData;
+            //imageInMemory = [[UIImage alloc] initWithData:imageData];//[self cropImagetoScreen: [[UIImage alloc] initWithData:imageData]];
+            previewImage = [self imageScaledToScreen:[[UIImage alloc] initWithData:imageData]];
             
 			NSLog(@"Current Mode: %d",modeCurrent);
 			
@@ -461,9 +463,34 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
 }
 
+- (UIImage *)cropImagetoScreen:(UIImage *)image
+{
+    //CGRect CropRect = CGRectMake(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height+15);
+    CGSize screenSize =[[UIScreen mainScreen] bounds].size;
+    
+    float ratio = screenSize.width/screenSize.height;
+    
+    CGRect rect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]), CGImageGetHeight([image CGImage]));
+    
+    float currentRatio = rect.size.height/rect.size.width;
+    
+    if(currentRatio>ratio) {
+        float newheight = rect.size.width*ratio;
+        rect.origin.y = (rect.size.height-newheight)/2;
+        rect.size.height = newheight;
+    }
+    
+    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], rect);
+    UIImage *cropped = [UIImage imageWithCGImage:imageRef scale:1.0 orientation:UIImageOrientationRight];
+    CGImageRelease(imageRef);
+    
+    return cropped;
+}
+
+
 -(UIImage*)imageScaledToScreen: (UIImage*) sourceImage
 {
-    CGSize bounds = sourceImage.size;
+    //CGSize bounds = sourceImage.size;
     float oldHeight = sourceImage.size.height;
     float screenHeight =[[UIScreen mainScreen] bounds].size.height*[[UIScreen mainScreen] scale];
     float scaleFactor = screenHeight / oldHeight;
@@ -502,7 +529,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(void)checkLoop
 {
 	// Ready
-	if( imageInMemory != NULL){
+	if( currentImageData != NULL){
 		
 		[UIView beginAnimations: @"Splash Intro" context:nil];
 		[UIView setAnimationDuration:2];
@@ -513,7 +540,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		self.previewThing.image = previewImage;
 		
         
-        [self saveImage:imageInMemory withMode:modeCurrent andEXIF:EXIF];
+        [self saveImage:currentImageData withMode:modeCurrent andEXIF:EXIF];
+        currentImageData=NULL;
 		imageInMemory = NULL;
         
         
@@ -522,7 +550,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 }
 
--(void)saveImage:(UIImage*)image withMode:(int)mode andEXIF:(NSDictionary*)exifData
+-(void)saveImage:(NSData*)imageData withMode:(int)mode andEXIF:(NSDictionary*)exifData
 {
 	UIBackgroundTaskIdentifier bgTask = UIBackgroundTaskInvalid;
     bgTask =   [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
@@ -532,28 +560,27 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     }];
     
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    dispatch_async(queue, ^{
         
-        UIImage *imageToSave = image;
+        UIImage *imageToSave = [self cropImagetoScreen:[[UIImage alloc] initWithData:imageData]];
         
         
         
         if(mode == 0)		{ imageToSave = [self clairMode:imageToSave];}
         else if(mode == 1)	{ imageToSave = [self noirMode:imageToSave];}
         else						{ imageToSave = [self adamantMode:imageToSave];}
-        
+        //imageToSave = [self cropImagetoScreen:imageToSave];
         NSData *imgData = UIImageJPEGRepresentation(imageToSave,1);
         NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
+        imageToSave = NULL;
         
         NSMutableDictionary *exifm = [exifData mutableCopy];
         
         //[exifm setObject:[NSNumber numberWithInt:6] forKey:@"Orientation"];
-        
-        [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageToSave CGImage] metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error){
+        [[[ALAssetsLibrary alloc] init] writeImageDataToSavedPhotosAlbum:imgData metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error){
             [[UIApplication sharedApplication] endBackgroundTask:bgTask];
             
         }];
-        [self performSelectorOnMainThread:@selector(displayModeMessage:) withObject:@"Saved" waitUntilDone:NO];
         isRendering--;
         
         

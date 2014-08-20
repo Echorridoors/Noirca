@@ -74,12 +74,15 @@ CGRect screen;
 NSTimer *blink;
 NSTimer *checkLooper;
 UIImage *imageInMemory;
+NSData *currentImageData;
 UIImage *previewImage;
 NSDictionary *EXIF;
 int isRendering;
 int modeCurrent;
 CGPoint startPoint;
 AVAudioPlayer * audioPlayer;
+dispatch_queue_t queue;
+
 
 
 
