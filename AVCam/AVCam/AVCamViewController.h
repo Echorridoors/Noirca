@@ -79,12 +79,16 @@ UIImage *previewImage;
 NSDictionary *EXIF;
 int isRendering;
 int isAuthorized;
+int isReady;
 int modeCurrent;
 CGPoint startPoint;
 AVAudioPlayer * audioPlayer;
 dispatch_queue_t queue;
 
 CGRect screen;
+
+// Hold Trigger Timer
+NSTimer *longPressTimer;
 
 
 

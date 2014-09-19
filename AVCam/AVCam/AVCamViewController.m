@@ -107,6 +107,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[self templateStart];
 	[self captureStart];
 	[self savingEnabledCheck];
+	
+	[self changeLensPosition:1];
+
 }
 
 -(void)savingEnabledCheck
@@ -119,6 +122,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	else{
 		isAuthorized = 1;
 	}
+	
+	if( isAuthorized == 0 ){
+		[self displayModeMessage:@"Authorize Noirca: Settings -> Privacy -> Photos"];
+	}
 }
 
 -(void)templateStart
@@ -128,8 +135,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_gridView.backgroundColor = [UIColor clearColor];
 	
 	_loadingIndicator.backgroundColor = [UIColor whiteColor];
-	_loadingIndicator.frame = CGRectMake(10, 10, 10, 10);
-	_loadingIndicator.layer.cornerRadius = 5;
+	_loadingIndicator.frame = CGRectMake(15, 15, 5, 5);
+	_loadingIndicator.layer.cornerRadius = 2.5;
 	
 	_blackScreenView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
 	_blackScreenView.backgroundColor = [UIColor blackColor];
@@ -153,13 +160,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
 	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
 	
-	_modeLabel.frame = CGRectMake(30, 0, screen.size.width-30, 30);
-	_modeLabel.text = @"Ready";
-	_modeLabel.alpha = 1;
-	
+	_modeLabel.frame = CGRectMake(30, 0, screen.size.width-30, 35);
 	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
-	
-	_modeLabel.alpha = 0;
 	
 	[self gridAnimationIn];
 }
@@ -200,11 +202,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[UIView setAnimationDuration:0.5];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 	
-	_centerHorizontalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
-	_centerHorizontalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
+	_centerHorizontalGrid.frame = CGRectMake(screen.size.width/4, screen.size.height/2, screen.size.width/2, 1);
 	
-	_centerVerticalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
-	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
+	_centerVerticalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
+	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, (screen.size.height/2)-((screen.size.height/40)/2), 1, screen.size.height/40);
 	
 	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
 	_centerHorizontalGridSecondary1.frame = CGRectMake(0, 0, screen.size.width, 1);
@@ -393,10 +394,32 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	if ([_videoDevice lockForConfiguration:&error])
 	{
 #ifdef __IPHONE_8_0
-		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
-		[_videoDevice setFocusModeLockedWithLensPosition:focalDistance completionHandler:nil];
-#endif
+//		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+//		[_videoDevice setFocusModeLockedWithLensPosition:focalDistance completionHandler:nil];
 		
+//		[_videoDevice setExposureModeCustomWithDuration:CMTimeMake(3,1) ISO:1000 completionHandler:nil];
+		
+		NSLog(@"ISO  %f <-> %f",_videoDevice.activeFormat.minISO,_videoDevice.activeFormat.maxISO);
+		NSLog(@"EXP  %lld <-> %lld",_videoDevice.activeFormat.minExposureDuration.value,_videoDevice.activeFormat.maxExposureDuration.value);
+#endif
+	}
+	else
+	{
+		NSLog(@"%@", error);
+	}
+}
+
+
+-(void)lensReset
+{
+	NSError *error = nil;
+	
+	if ([_videoDevice lockForConfiguration:&error])
+	{
+		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:[_videoDevice ISO] completionHandler:nil];
+		[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
+		[self displayModeMessage:@"Adjusted"];
+		isReady = 0;
 	}
 	else
 	{
@@ -410,27 +433,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
 	UITouch *theTouch = [touches anyObject];
 	startPoint = [theTouch locationInView:self.focusView];
-	CGPoint touchLocation = [theTouch locationInView:self.focusView];
 	
-	NSLog(@"%f",touchLocation.y);
-	
+	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(lensReset) userInfo:nil repeats:YES];
+	isReady = 1;
 }
 
-- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	UITouch *theTouch = [touches anyObject];
-	CGPoint touchLocation = [theTouch locationInView:self.focusView];
-	
-	float test = (touchLocation.y/self.view.frame.size.height);
-	
-	NSLog(@"%f",test);
-	
-	// Ready for iOS8
-//	[self changeLensPosition:test];
-	
-}
-
-- (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	[self takePicture];
+- (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	if(isReady == 1){
+		[self takePicture];
+	}
+	[longPressTimer invalidate];
 }
 
 #pragma mark Picture
@@ -459,9 +472,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[UIView commitAnimations];
 		
 		self.previewThing.image = NULL;
-		
-		[self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
+	
 		[self gridAnimationIn];
+		[self displayModeMessage:@"Ready"];
 		return;
 	}
 	
@@ -490,7 +503,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}];
 	
 	[self gridAnimationOut];
-	
+	[self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
 	_blackScreenView.alpha = 1;
 	
 	// save
@@ -548,7 +561,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	[UIView beginAnimations: @"Splash Intro" context:nil];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-	[UIView setAnimationDelay:1];
+	[UIView setAnimationDelay:2];
 	[UIView setAnimationDuration:0.5];
 	_modeLabel.alpha = 0;
 	_loadingIndicator.alpha = 1;
