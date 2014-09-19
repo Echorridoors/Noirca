@@ -102,6 +102,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	[self templateStart];
 	
+	ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
+	
+	if (status != ALAuthorizationStatusAuthorized && status!= ALAuthorizationStatusNotDetermined) {
+		//user has denied access to photos either by saying no, or parental controls. We should maybe alert them to this fact?
+		NSLog(@"TODO: Tell the user to accept noirca!");
+	}
+	
 	// Create the AVCaptureSession
 	AVCaptureSession *session = [[AVCaptureSession alloc] init];
     session.sessionPreset = AVCaptureSessionPresetPhoto; //gets best image quality
