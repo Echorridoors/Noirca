@@ -97,18 +97,132 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-	
+	[self start];
+}
+
+-(void)start
+{
 	modeCurrent = 2;
 	
 	[self templateStart];
-	
+	[self captureStart];
+	[self savingEnabledCheck];
+}
+
+-(void)savingEnabledCheck
+{
 	ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
-	
 	if (status != ALAuthorizationStatusAuthorized && status!= ALAuthorizationStatusNotDetermined) {
-		//user has denied access to photos either by saying no, or parental controls. We should maybe alert them to this fact?
-		NSLog(@"TODO: Tell the user to accept noirca!");
+		_loadingIndicator.backgroundColor = [UIColor redColor];
+		isAuthorized = 0;
 	}
+	else{
+		isAuthorized = 1;
+	}
+}
+
+-(void)templateStart
+{
+	screen = [[UIScreen mainScreen] bounds];
+	_gridView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
+	_gridView.backgroundColor = [UIColor clearColor];
 	
+	_loadingIndicator.backgroundColor = [UIColor whiteColor];
+	_loadingIndicator.frame = CGRectMake(10, 10, 10, 10);
+	_loadingIndicator.layer.cornerRadius = 5;
+	
+	_blackScreenView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
+	_blackScreenView.backgroundColor = [UIColor blackColor];
+	_blackScreenView.alpha = 0;
+	
+	_centerHorizontalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+	_centerHorizontalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
+	
+	_centerVerticalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
+	
+	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerHorizontalGridSecondary1.frame = CGRectMake(0, 0, screen.size.width, 1);
+	
+	_centerHorizontalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, screen.size.height, screen.size.width, 1);
+	
+	_centerVerticalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerVerticalGridSecondary1.frame = CGRectMake(0, 0, 1, screen.size.height);
+	
+	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
+	
+	_modeLabel.frame = CGRectMake(30, 0, screen.size.width-30, 30);
+	_modeLabel.text = @"Ready";
+	_modeLabel.alpha = 1;
+	
+	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
+	
+	_modeLabel.alpha = 0;
+	
+	[self gridAnimationIn];
+}
+
+-(void)gridAnimationIn
+{
+	NSLog(@"grid animatio -> In");
+	
+	[UIView beginAnimations: @"Splash Intro" context:nil];
+	[UIView setAnimationDuration:0.3];
+	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+	
+	_centerHorizontalGrid.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tile.png"]];
+	_centerHorizontalGrid.frame = CGRectMake(0, screen.size.height/2, screen.size.width, 1);
+	
+	_centerVerticalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
+	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, 0, 1, screen.size.height);
+	
+	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
+	_centerHorizontalGridSecondary1.frame = CGRectMake(0, screen.size.height/3, screen.size.width, 1);
+	
+	_centerHorizontalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
+	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, (screen.size.height/3)*2, screen.size.width, 1);
+	
+	_centerVerticalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
+	_centerVerticalGridSecondary1.frame = CGRectMake(screen.size.width/3, 0, 1, screen.size.height);
+	
+	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
+	_centerVerticalGridSecondary2.frame = CGRectMake((screen.size.width/3)*2, 0, 1, screen.size.height);
+	
+	[UIView commitAnimations];
+}
+
+-(void)gridAnimationOut
+{
+	NSLog(@"grid animatio -> Out");
+	[UIView beginAnimations: @"Splash Intro" context:nil];
+	[UIView setAnimationDuration:0.5];
+	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+	
+	_centerHorizontalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+	_centerHorizontalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
+	
+	_centerVerticalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
+	
+	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerHorizontalGridSecondary1.frame = CGRectMake(0, 0, screen.size.width, 1);
+	
+	_centerHorizontalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, screen.size.height, screen.size.width, 1);
+	
+	_centerVerticalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerVerticalGridSecondary1.frame = CGRectMake(0, 0, 1, screen.size.height);
+	
+	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
+	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
+	
+	[UIView commitAnimations];
+}
+
+-(void)captureStart
+{
 	// Create the AVCaptureSession
 	AVCaptureSession *session = [[AVCaptureSession alloc] init];
     session.sessionPreset = AVCaptureSessionPresetPhoto; //gets best image quality
@@ -153,7 +267,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 				[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:(AVCaptureVideoOrientation)[self interfaceOrientation]];
 			});
 		}
-				
+		
 		AVCaptureStillImageOutput *stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
 		if ([session canAddOutput:stillImageOutput])
 		{
@@ -163,7 +277,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		}
 	});
     [self installVolume];
-	[self toggleMode];
 	
 	[self apiContact:@"noirca":@"analytics":@"launch":@"1"];
 	
@@ -171,75 +284,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	//	[self changeLensPosition:0];
     
     queue = dispatch_queue_create("com.XXIIVV.SaveImageQueue", NULL);
-}
-
--(void)templateStart
-{
-	CGRect screen = [[UIScreen mainScreen] bounds];
-	_gridView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
-	_gridView.backgroundColor = [UIColor clearColor];
-	
-	_loadingIndicator.backgroundColor = [UIColor whiteColor];
-	_loadingIndicator.frame = CGRectMake(10, 10, 10, 10);
-	_loadingIndicator.layer.cornerRadius = 5;
-	
-	_blackScreenView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
-	_blackScreenView.backgroundColor = [UIColor blackColor];
-	
-	
-	_centerHorizontalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
-	_centerHorizontalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
-	
-	_centerVerticalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
-	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
-	
-	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
-	_centerHorizontalGridSecondary1.frame = CGRectMake(0, 0, screen.size.width, 1);
-	
-	_centerHorizontalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
-	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, screen.size.height, screen.size.width, 1);
-	
-	_centerVerticalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
-	_centerVerticalGridSecondary1.frame = CGRectMake(0, 0, 1, screen.size.height);
-	
-	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
-	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
-	
-	_modeLabel.frame = CGRectMake(30, 0, screen.size.width-30, 30);
-	_modeLabel.text = @"Ready";
-	_modeLabel.alpha = 1;
-	
-	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
-	
-	[UIView beginAnimations: @"Splash Intro" context:nil];
-	[UIView setAnimationDuration:0.5];
-	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-	
-	_blackScreenView.alpha = 0;
-	
-	_modeLabel.alpha = 0;
-	
-	_centerHorizontalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
-	_centerHorizontalGrid.frame = CGRectMake(0, screen.size.height/2, screen.size.width, 1);
-	
-	_centerVerticalGrid.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
-	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, 0, 1, screen.size.height);
-	
-	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerHorizontalGridSecondary1.frame = CGRectMake(0, screen.size.height/3, screen.size.width, 1);
-	
-	_centerHorizontalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, (screen.size.height/3)*2, screen.size.width, 1);
-	
-	_centerVerticalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerVerticalGridSecondary1.frame = CGRectMake(screen.size.width/3, 0, 1, screen.size.height);
-	
-	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerVerticalGridSecondary2.frame = CGRectMake((screen.size.width/3)*2, 0, 1, screen.size.height);
-	
-	[UIView commitAnimations];
-	
-	
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -393,46 +437,38 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 -(void)takePicture
 {
-	CGRect screen = [[UIScreen mainScreen] bounds];
-	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
-	
-	// Disallow Click
+	if( isAuthorized == 0 ){
+		[self savingEnabledCheck];
+		[self displayModeMessage:@"Authorize Noirca: Settings -> Privacy -> Photos"];
+		return;
+	}
 	if( isRendering > 2 ){  //disallow if the user has already taken 3 images
 		[self displayModeMessage:@"wait"];
 		return;
 	}
+
+	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
 	
 	// Remove preview image
 	if( self.previewThing.image != NULL ){
 		[UIView beginAnimations: @"Splash Intro" context:nil];
 		[UIView setAnimationDuration:1];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-		_blackScreenView.alpha = 0;
 		_loadingIndicator.alpha = 1;
+		_blackScreenView.alpha = 0;
 		[UIView commitAnimations];
 		
 		self.previewThing.image = NULL;
 		
 		[self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
+		[self gridAnimationIn];
 		return;
 	}
 	
-	_blackScreenView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
-	_blackScreenView.alpha = 0;
 	_previewThing.alpha = 0;
-	
-	// Animate
-	[UIView beginAnimations: @"Splash Intro" context:nil];
-	[UIView setAnimationDuration:0.5];
-	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-	[UIView setAnimationDelay:1];
-	_blackScreenView.alpha = 1;
-	[UIView commitAnimations];
 	
 	// Save
 	isRendering++;
-	
-	//checkLooper = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(checkLoop) userInfo:nil repeats:YES];
 	
 	[[[self stillImageOutput] connectionWithMediaType:AVMediaTypeVideo] setVideoOrientation:AVCaptureVideoOrientationPortrait];
 	
@@ -445,26 +481,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             CFDictionaryRef metaDict = CMCopyDictionaryOfAttachments(NULL, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
             
             EXIF = (__bridge NSDictionary*)metaDict;
-            
-            //CFMutableDictionaryRef mutable = CFDictionaryCreateMutableCopy(NULL, 0, metaDict);
-            
-            //NSMutableDictionary *EXIFDictionary = (__bridge NSMutableDictionary*)CFDictionaryGetValue(mutable, kCGImagePropertyExifDictionary);
-            
-            
-            currentImageData = imageData;
-            //imageInMemory = [[UIImage alloc] initWithData:imageData];//[self cropImagetoScreen: [[UIImage alloc] initWithData:imageData]];
-            previewImage = [self imageScaledToScreen:[[UIImage alloc] initWithData:imageData]];
-            
-			NSLog(@"Current Mode: %d",modeCurrent);
 			
-			if(modeCurrent == 0)		{ previewImage = [self clairMode:previewImage];}
-			else if(modeCurrent == 1)	{ previewImage = [self noirMode:previewImage];}
-			else						{ previewImage = [self adamantMode:previewImage];}
+            currentImageData = imageData;
+			previewImage = [self filterMode:[self imageScaledToScreen:[[UIImage alloc] initWithData:imageData]]];
 			
             [self checkLoop];
-			
 		}
 	}];
+	
+	[self gridAnimationOut];
+	
+	_blackScreenView.alpha = 1;
 	
 	// save
 	[[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
@@ -488,12 +515,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     }
     
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], rect);
-    UIImage *cropped = [UIImage imageWithCGImage:imageRef scale:1.0 orientation:UIImageOrientationRight];
+    UIImage *cropped = [UIImage imageWithCGImage:imageRef scale:1.0 orientation:UIImageOrientationUp];
     CGImageRelease(imageRef);
     
     return cropped;
 }
-
 
 -(UIImage*)imageScaledToScreen: (UIImage*) sourceImage
 {
@@ -513,10 +539,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     /*return [UIImage imageWithCGImage:[newImage CGImage]
                                scale:1.0
                          orientation: UIImageOrientationRight];*/
-}
-
-- (IBAction)snapStillImage:(id)sender
-{
 }
 
 -(void)displayModeMessage :(NSString*)message
@@ -539,22 +561,18 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	if( currentImageData != NULL){
 		
 		[UIView beginAnimations: @"Splash Intro" context:nil];
-		[UIView setAnimationDuration:2];
+		[UIView setAnimationDuration:0.5];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 		_previewThing.alpha = 1;
 		[UIView commitAnimations];
 		
 		self.previewThing.image = previewImage;
-		
-        
+
         [self saveImage:currentImageData withMode:modeCurrent andEXIF:EXIF];
         currentImageData=NULL;
 		imageInMemory = NULL;
-        
-        
-		
-		//[checkLooper invalidate];
 	}
+	NSLog(@"check");
 }
 
 -(void)saveImage:(NSData*)imageData withMode:(int)mode andEXIF:(NSDictionary*)exifData
@@ -571,11 +589,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         
         UIImage *imageToSave = [self cropImagetoScreen:[[UIImage alloc] initWithData:imageData]];
         
-        
-        
-        if(mode == 0)		{ imageToSave = [self clairMode:imageToSave];}
-        else if(mode == 1)	{ imageToSave = [self noirMode:imageToSave];}
-        else						{ imageToSave = [self adamantMode:imageToSave];}
+        imageToSave = [self filterMode:imageToSave];
+
         //imageToSave = [self cropImagetoScreen:imageToSave];
         NSData *imgData = UIImageJPEGRepresentation(imageToSave,1);
         NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
@@ -597,12 +612,12 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 }
 
 #pragma mark Filters
-
--(UIImage *) clairMode:(UIImage *)image {
+-(float)getImageAverage:(UIImage *)image
+{
 	const int RED = 1, GREEN = 2, BLUE = 3;
 	
-	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
-    
+	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+	
 	int width = imageRect.size.width, height = imageRect.size.height;
 	
 	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
@@ -613,6 +628,41 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
 	
+	int pixelCount = 0;
+	float pixelGray = 0;
+	
+	// Find average
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
+			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
+			uint32_t gray = (0.1*rgbaPixel[RED]+0.1*rgbaPixel[GREEN]+0.8*rgbaPixel[BLUE]);
+			pixelCount += 1;
+			pixelGray += gray;
+		}
+	}
+	
+	return (pixelGray/pixelCount)/255;
+}
+
+
+-(UIImage *) filterMode:(UIImage *)image
+{
+	const int RED = 1, GREEN = 2, BLUE = 3;
+	
+	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+	
+	int width = imageRect.size.width, height = imageRect.size.height;
+	
+	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
+	memset(pixels, 0, width * height * sizeof(uint32_t));
+	
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+	
+	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
+	
+	float imageAverage = [self getImageAverage:image];
+	
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
@@ -620,14 +670,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			
 			float grayFloat = gray;
 			
-			// Remove contrast and push to white
 			float whiteContent = (float)grayFloat/255;
-			grayFloat = (grayFloat * whiteContent * 1.85)+60;
+			grayFloat = (grayFloat * whiteContent * 1.25)+60;
 			
 			whiteContent = (float)grayFloat/255;
-			grayFloat = grayFloat + (whiteContent * 200.5)-40;
+			grayFloat = grayFloat + (whiteContent * 200.5)-80;
 			
-			grayFloat *= 0.35;
+			grayFloat *= 1-imageAverage;
 			grayFloat += 10;
 			
 			// Cap
@@ -639,120 +688,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			rgbaPixel[RED] = gray;
 			rgbaPixel[GREEN] = gray;
 			rgbaPixel[BLUE] = gray;
-		}
-	}
-	
-	CGImageRef newImage = CGBitmapContextCreateImage(context);
-	
-	CGContextRelease(context);
-	CGColorSpaceRelease(colorSpace);
-	free(pixels);
-	
-	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
-	CGImageRelease(newImage);
-	
-	return resultUIImage;
-}
-
--(UIImage *) noirMode:(UIImage *)image {
-	const int RED = 1, GREEN = 2, BLUE = 3;
-	
-	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
-    
-	int width = imageRect.size.width, height = imageRect.size.height;
-	
-	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
-	memset(pixels, 0, width * height * sizeof(uint32_t));
-	
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
-	
-	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
-	
-	for(int y = 0; y < height; y++) {
-		for(int x = 0; x < width; x++) {
-			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t gray = (0.0*rgbaPixel[RED]+0.4*rgbaPixel[GREEN]+0.5*rgbaPixel[BLUE]);
-			
-			float grayFloat = gray;
-			
-			// Remove contrast and push to white
-			float whiteContent = (float)grayFloat/255;
-			grayFloat = (grayFloat * whiteContent * 1.25);
-//
-			whiteContent = (float)grayFloat/255;
-			grayFloat = grayFloat + (whiteContent * 100);
-			
-			grayFloat *= 0.85;
-			grayFloat += 10;
-			
-			// Cap
-			if(grayFloat < 0){ grayFloat = 0; }
-			grayFloat *= 1.75;
-			if(grayFloat > 255){ grayFloat = 255; }
-			grayFloat *= 0.5;
-			if(grayFloat < 0){ grayFloat = 0; }
-			
-			gray = (int)grayFloat;
-			
-			rgbaPixel[RED] = gray;
-			rgbaPixel[GREEN] = gray;
-			rgbaPixel[BLUE] = gray;
-		}
-	}
-	
-	CGImageRef newImage = CGBitmapContextCreateImage(context);
-	
-	CGContextRelease(context);
-	CGColorSpaceRelease(colorSpace);
-	free(pixels);
-	
-	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
-	CGImageRelease(newImage);
-	
-	return resultUIImage;
-}
-
--(UIImage *) adamantMode:(UIImage *)image {
-	const int RED = 1, GREEN = 2, BLUE = 3;
-	
-	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
-    
-	int width = imageRect.size.width, height = imageRect.size.height;
-	
-	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
-	memset(pixels, 0, width * height * sizeof(uint32_t));
-	
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
-	
-	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
-	
-	for(int y = 0; y < height; y++) {
-		for(int x = 0; x < width; x++) {
-			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t gray = (0.0*rgbaPixel[RED]+0.4*rgbaPixel[GREEN]+0.5*rgbaPixel[BLUE]);
-			
-			rgbaPixel[RED] = (rgbaPixel[RED]*0.0) + (rgbaPixel[GREEN]*0.4) + (rgbaPixel[BLUE]*0.4);
-			rgbaPixel[GREEN] = (rgbaPixel[RED]*0.6) + (rgbaPixel[GREEN]*0.15) + (rgbaPixel[BLUE]*0.15);
-			rgbaPixel[BLUE] = (rgbaPixel[RED]*0.1) + (rgbaPixel[GREEN]*0.7) + (rgbaPixel[BLUE]*0.1);
-			
-			gray = ( (rgbaPixel[RED]*1)+(rgbaPixel[GREEN]*1)+(rgbaPixel[BLUE]*1) );
-			
-			float grayFloat = ( (rgbaPixel[RED]*1)+(rgbaPixel[GREEN]*1)+(rgbaPixel[BLUE]*1) );
-			
-			if(grayFloat > 255){
-				grayFloat = 255-grayFloat;
-				grayFloat = (int)grayFloat+255;
-			}
-			if(grayFloat < 0){
-				grayFloat = 255-grayFloat;
-			}
-			
-			rgbaPixel[RED] = grayFloat;
-			rgbaPixel[GREEN] = grayFloat;
-			rgbaPixel[BLUE] = grayFloat;
-			
 		}
 	}
 	
@@ -879,9 +814,6 @@ float currentVolume; //Current Volume
     
     [[NSNotificationCenter defaultCenter]
      addObserver:self selector:@selector(resetVolumeButton) name:UIApplicationDidBecomeActiveNotification object:nil];
-    
-    
-    
 }
 
 -(void)uninstallVolume { /*removes notifications, install when you are closing the app or the camera view*/
@@ -918,58 +850,9 @@ float currentVolume; //Current Volume
     currentVolume=volume;
 }
 
-- (IBAction)modeButton:(id)sender {
-	
-	[self toggleMode];
-	
-	[self audioPlayer:@"fx.click.wav"];
-	
-}
-
--(void)toggleMode
+- (IBAction)modeButton:(id)sender
 {
-	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
-	
-	modeCurrent += 1;
-	
-	if(pictureCount > 50){
-		if( modeCurrent > 2 ){ modeCurrent = 0; }
-	}
-	else{
-		if( modeCurrent > 1 ){ modeCurrent = 0; }
-	}
-	
-	if(modeCurrent == 0){
-		
-		[self displayModeMessage:@"clair"];
-		
-		[UIView beginAnimations: @"Splash Intro" context:nil];
-		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-		[UIView setAnimationDuration:0.5];
-		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
-		[UIView commitAnimations];
-	}
-	if(modeCurrent == 1){
-		
-		[self displayModeMessage:@"noir"];
-		
-		[UIView beginAnimations: @"Splash Intro" context:nil];
-		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-		[UIView setAnimationDuration:0.5];
-		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:0 alpha:1];
-		[UIView commitAnimations];
-	}
-	if(modeCurrent == 2){
-		
-		[self displayModeMessage:@"adamant"];
-		
-		[UIView beginAnimations: @"Splash Intro" context:nil];
-		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-		[UIView setAnimationDuration:0.5];
-		_loadingIndicator.backgroundColor = [UIColor colorWithWhite:0.5 alpha:1];
-		[UIView commitAnimations];
-	}
-	
+//	[self audioPlayer:@"fx.click.wav"];
 }
 
 -(void)audioPlayer: (NSString *)filename;

@@ -78,10 +78,13 @@ NSData *currentImageData;
 UIImage *previewImage;
 NSDictionary *EXIF;
 int isRendering;
+int isAuthorized;
 int modeCurrent;
 CGPoint startPoint;
 AVAudioPlayer * audioPlayer;
 dispatch_queue_t queue;
+
+CGRect screen;
 
 
 

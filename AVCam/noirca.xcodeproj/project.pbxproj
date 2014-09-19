@@ -12,6 +12,7 @@
 		0367E4A61966273D00CF5708 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0367E4A51966273D00CF5708 /* AudioToolbox.framework */; };
 		0367E4A81966274200CF5708 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0367E4A71966274200CF5708 /* CoreAudio.framework */; };
 		0367E4AA196627EB00CF5708 /* fx.click.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0367E4A9196627EB00CF5708 /* fx.click.wav */; };
+		03AC729719CC5549001A148D /* tile.png in Resources */ = {isa = PBXBuildFile; fileRef = 03AC729619CC5549001A148D /* tile.png */; };
 		2F360BB017692C4700D9A404 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BAE17692C4700D9A404 /* InfoPlist.strings */; };
 		2F360BB217692C4700D9A404 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F360BB117692C4700D9A404 /* main.m */; };
 		2F360BB617692C4700D9A404 /* AVCamAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F360BB517692C4700D9A404 /* AVCamAppDelegate.m */; };
@@ -29,6 +30,7 @@
 		0367E4A51966273D00CF5708 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		0367E4A71966274200CF5708 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		0367E4A9196627EB00CF5708 /* fx.click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = fx.click.wav; sourceTree = "<group>"; };
+		03AC729619CC5549001A148D /* tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tile.png; sourceTree = "<group>"; };
 		2F360BA217692C4700D9A404 /* noirca.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = noirca.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F360BAD17692C4700D9A404 /* noirca-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "noirca-Info.plist"; sourceTree = "<group>"; };
 		2F360BAF17692C4700D9A404 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 		2F360BAB17692C4700D9A404 /* AVCam */ = {
 			isa = PBXGroup;
 			children = (
+				03AC729619CC5549001A148D /* tile.png */,
 				0367E4A9196627EB00CF5708 /* fx.click.wav */,
 				2F360BB417692C4700D9A404 /* AVCamAppDelegate.h */,
 				2F360BB517692C4700D9A404 /* AVCamAppDelegate.m */,
@@ -187,6 +190,7 @@
 				2F360BB017692C4700D9A404 /* InfoPlist.strings in Resources */,
 				2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */,
 				031B7E02195CB7FE0065963C /* icon.120.png in Resources */,
+				03AC729719CC5549001A148D /* tile.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
