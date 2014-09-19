@@ -390,7 +390,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	{
 		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:[_videoDevice ISO] completionHandler:nil];
 		[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
-		[self displayModeMessage:@"Manual"];
+		[self displayModeMessage:@"Manual Mode"];
 		
 		isReady = 0;
 		
