@@ -107,9 +107,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[self templateStart];
 	[self captureStart];
 	[self savingEnabledCheck];
-	
-	[self changeLensPosition:1];
-
 }
 
 -(void)savingEnabledCheck
@@ -385,32 +382,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 }
 
-#pragma mark Actions
-
-- (void)changeLensPosition:(float)focalDistance
-{
-	NSError *error = nil;
-	
-	if ([_videoDevice lockForConfiguration:&error])
-	{
-#ifdef __IPHONE_8_0
-//		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
-//		[_videoDevice setFocusModeLockedWithLensPosition:focalDistance completionHandler:nil];
-		
-//		[_videoDevice setExposureModeCustomWithDuration:CMTimeMake(3,1) ISO:1000 completionHandler:nil];
-		
-		NSLog(@"ISO  %f <-> %f",_videoDevice.activeFormat.minISO,_videoDevice.activeFormat.maxISO);
-		NSLog(@"EXP  %lld <-> %lld",_videoDevice.activeFormat.minExposureDuration.value,_videoDevice.activeFormat.maxExposureDuration.value);
-#endif
-	}
-	else
-	{
-		NSLog(@"%@", error);
-	}
-}
-
-
--(void)lensReset
+-(void)lensUpdate
 {
 	NSError *error = nil;
 	
@@ -418,8 +390,21 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	{
 		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:[_videoDevice ISO] completionHandler:nil];
 		[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
-		[self displayModeMessage:@"Adjusted"];
+		[self displayModeMessage:@"Manual"];
+		
 		isReady = 0;
+		
+		if( [_videoDevice focusMode] == AVCaptureFocusModeAutoFocus ){
+			[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+		}
+		else{
+			[_videoDevice setFocusMode:AVCaptureFocusModeAutoFocus];
+		}
+		
+		NSLog(@"ISO   | %f",[_videoDevice ISO]);
+		NSLog(@"EXPOS | %lld",[_videoDevice exposureDuration].value);
+		NSLog(@"FOCUS | %f",[_videoDevice lensPosition]);
+		NSLog(@"APERT | %f",[_videoDevice lensAperture]);
 	}
 	else
 	{
@@ -434,7 +419,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	UITouch *theTouch = [touches anyObject];
 	startPoint = [theTouch locationInView:self.focusView];
 	
-	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(lensReset) userInfo:nil repeats:YES];
+	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.75 target:self selector:@selector(lensUpdate) userInfo:nil repeats:YES];
 	isReady = 1;
 }
 
