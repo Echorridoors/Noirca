@@ -160,7 +160,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
 	
 	_loadingIndicator.backgroundColor = [UIColor whiteColor];
-	_loadingIndicator.frame = CGRectMake( (screen.size.width - tileSize)+ 15, (screen.size.height - tileSize)+ 15, 5, 5);
+	_loadingIndicator.frame = CGRectMake( (screen.size.width - ((tileSize/2)+2)), (screen.size.height - ((tileSize/2)+2)), 4, 4);
 	_loadingIndicator.layer.cornerRadius = 2.5;
 	
 	_touchIndicatorX.backgroundColor = [UIColor whiteColor];
