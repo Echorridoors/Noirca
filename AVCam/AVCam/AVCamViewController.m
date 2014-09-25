@@ -107,6 +107,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[self templateStart];
 	[self captureStart];
 	[self savingEnabledCheck];
+	[self updateLensDataLoop];
 }
 
 -(void)savingEnabledCheck
@@ -121,19 +122,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 	
 	if( isAuthorized == 0 ){
-		[self displayModeMessage:@"Authorize Noirca: Settings -> Privacy -> Photos"];
+		[self displayModeMessage:@"Settings -> Privacy -> Photos"];
 	}
 }
 
 -(void)templateStart
 {
 	screen = [[UIScreen mainScreen] bounds];
+	tileSize = screen.size.width/8;
+	
 	_gridView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
 	_gridView.backgroundColor = [UIColor clearColor];
-	
-	_loadingIndicator.backgroundColor = [UIColor whiteColor];
-	_loadingIndicator.frame = CGRectMake(15, 15, 5, 5);
-	_loadingIndicator.layer.cornerRadius = 2.5;
 	
 	_blackScreenView.frame = CGRectMake(0, 0, screen.size.width, screen.size.height);
 	_blackScreenView.backgroundColor = [UIColor blackColor];
@@ -157,8 +156,23 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
 	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
 	
-	_modeLabel.frame = CGRectMake(30, 0, screen.size.width-30, 35);
+	_modeLabel.frame = CGRectMake(screen.size.width-(tileSize*5), screen.size.height - tileSize, tileSize*4, tileSize);
 	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
+	
+	_loadingIndicator.backgroundColor = [UIColor whiteColor];
+	_loadingIndicator.frame = CGRectMake( (screen.size.width - tileSize)+ 15, (screen.size.height - tileSize)+ 15, 5, 5);
+	_loadingIndicator.layer.cornerRadius = 2.5;
+	
+	_touchIndicatorX.backgroundColor = [UIColor whiteColor];
+	_touchIndicatorX.frame = CGRectMake( (screen.size.width - tileSize)+ 15, (screen.size.height - tileSize)+ 15, 5, 5);
+	_touchIndicatorX.layer.cornerRadius = 2.5;
+	
+	_focusLabel.frame = CGRectMake(tileSize/4, screen.size.height-tileSize, tileSize, tileSize);
+	_isoLabel.frame = CGRectMake(tileSize/4 + tileSize, screen.size.height-tileSize, tileSize, tileSize);
+	
+	_touchIndicatorX.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1,1 );
+	_touchIndicatorY.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1, 1);
+	_touchIndicatorXY.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1,1 );;
 	
 	[self gridAnimationIn];
 }
@@ -217,6 +231,22 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
 	
 	[UIView commitAnimations];
+}
+
+-(void)updateLensDataLoop
+{
+	[NSTimer scheduledTimerWithTimeInterval:0.05 target:self selector:@selector(updateLensData) userInfo:nil repeats:YES];
+}
+
+-(void)updateLensData
+{
+	_focusLabel.text = [NSString stringWithFormat:@"%d%%", (int)([_videoDevice lensPosition] * 100) ];
+	_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO]) ];
+	
+//	NSLog(@"ISO   | %f",[_videoDevice ISO]);
+//	NSLog(@"EXPOS | %lld",[_videoDevice exposureDuration].value);
+//	NSLog(@"FOCUS | %f",[_videoDevice lensPosition]);
+//	NSLog(@"APERT | %f",[_videoDevice lensAperture]);
 }
 
 -(void)captureStart
@@ -392,6 +422,19 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
 		[self displayModeMessage:@"Manual Mode"];
 		
+		[_videoDevice setFocusPointOfInterest:startPoint];
+		
+		[UIView beginAnimations: @"Splash Intro" context:nil];
+		[UIView setAnimationDuration:0.1];
+		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+		_touchIndicatorX.frame = CGRectMake( startPoint.x, screen.size.height/2, 8,1 );
+		_touchIndicatorY.frame = CGRectMake( screen.size.width/2, startPoint.y, 1, 5);
+		_touchIndicatorXY.frame = CGRectMake( startPoint.x, startPoint.y, 1, 1);
+		_touchIndicatorX.alpha = 1;
+		_touchIndicatorY.alpha = 1;
+		_touchIndicatorXY.alpha = 1;
+		[UIView commitAnimations];
+		
 		isReady = 0;
 		
 		if( [_videoDevice focusMode] == AVCaptureFocusModeAutoFocus ){
@@ -400,11 +443,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		else{
 			[_videoDevice setFocusMode:AVCaptureFocusModeAutoFocus];
 		}
-		
-		NSLog(@"ISO   | %f",[_videoDevice ISO]);
-		NSLog(@"EXPOS | %lld",[_videoDevice exposureDuration].value);
-		NSLog(@"FOCUS | %f",[_videoDevice lensPosition]);
-		NSLog(@"APERT | %f",[_videoDevice lensAperture]);
 	}
 	else
 	{

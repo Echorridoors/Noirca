@@ -59,12 +59,20 @@
 @property (strong, nonatomic) IBOutlet UIView *centerVerticalGridSecondary2;
 @property (strong, nonatomic) IBOutlet UIView *centerHorizontalGridSecondary1;
 @property (strong, nonatomic) IBOutlet UIView *centerHorizontalGridSecondary2;
-@property (strong, nonatomic) IBOutlet UIView *loadingIndicator;
+
 @property (strong, nonatomic) IBOutlet UIView *blackScreenView;
 
 @property (strong, nonatomic) IBOutlet UIButton *modeButton;
 @property (strong, nonatomic) IBOutlet UILabel *modeLabel;
 @property (strong, nonatomic) IBOutlet UIView *focusView;
+
+@property (strong, nonatomic) IBOutlet UILabel *isoLabel;
+@property (strong, nonatomic) IBOutlet UILabel *focusLabel;
+
+@property (strong, nonatomic) IBOutlet UIView *loadingIndicator;
+@property (strong, nonatomic) IBOutlet UIView *touchIndicatorX;
+@property (strong, nonatomic) IBOutlet UIView *touchIndicatorY;
+@property (strong, nonatomic) IBOutlet UIView *touchIndicatorXY;
 
 - (IBAction)modeButton:(id)sender;
 
@@ -86,6 +94,7 @@ AVAudioPlayer * audioPlayer;
 dispatch_queue_t queue;
 
 CGRect screen;
+float tileSize;
 
 // Hold Trigger Timer
 NSTimer *longPressTimer;
