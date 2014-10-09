@@ -45,6 +45,12 @@
  
  */
 
+#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
+#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
+
 #import "AVCamViewController.h"
 
 #import <AVFoundation/AVFoundation.h>
@@ -240,8 +246,12 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 -(void)updateLensData
 {
-	_focusLabel.text = [NSString stringWithFormat:@"%d%%", (int)([_videoDevice lensPosition] * 100) ];
-	_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO]) ];
+	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+		_focusLabel.text = [NSString stringWithFormat:@"%d%%", (int)([_videoDevice lensPosition] * 100) ];
+		_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO]) ];
+	}
+	
+	
 	
 //	NSLog(@"ISO   | %f",[_videoDevice ISO]);
 //	NSLog(@"EXPOS | %lld",[_videoDevice exposureDuration].value);
@@ -307,9 +317,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self installVolume];
 	
 	[self apiContact:@"noirca":@"analytics":@"launch":@"1"];
-	
-	// Ready for iOS8
-	//	[self changeLensPosition:0];
     
     queue = dispatch_queue_create("com.XXIIVV.SaveImageQueue", NULL);
 }
@@ -414,6 +421,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 -(void)lensUpdate
 {
+	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+		return;
+	}
+		
 	NSError *error = nil;
 	
 	if ([_videoDevice lockForConfiguration:&error])
@@ -869,10 +880,6 @@ float currentVolume; //Current Volume
     
     [p prepareToPlay];
     [p stop];
-    
-    MPMusicPlayerController *volumeGetter = [MPMusicPlayerController iPodMusicPlayer];
-    
-    currentVolume = volumeGetter.volume;
 }
 
 - (void)volumeChanged:(NSNotification *)notification{
