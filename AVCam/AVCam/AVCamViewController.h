@@ -68,11 +68,12 @@
 
 @property (strong, nonatomic) IBOutlet UILabel *isoLabel;
 @property (strong, nonatomic) IBOutlet UILabel *focusLabel;
+@property (strong, nonatomic) IBOutlet UILabel *isoTextLabel;
+@property (strong, nonatomic) IBOutlet UILabel *focusTextLabel;
 
 @property (strong, nonatomic) IBOutlet UIView *loadingIndicator;
 @property (strong, nonatomic) IBOutlet UIView *touchIndicatorX;
 @property (strong, nonatomic) IBOutlet UIView *touchIndicatorY;
-@property (strong, nonatomic) IBOutlet UIView *touchIndicatorXY;
 
 - (IBAction)modeButton:(id)sender;
 
@@ -90,6 +91,7 @@ int isAuthorized;
 int isReady;
 int modeCurrent;
 CGPoint startPoint;
+CGPoint movedPoint;
 AVAudioPlayer * audioPlayer;
 dispatch_queue_t queue;
 

@@ -47,11 +47,6 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                             </view>
-                            <view contentMode="scaleToFill" id="1Fg-tQ-yI0" userLabel="touchIndicatorXY">
-                                <rect key="frame" x="80" y="142" width="160" height="284"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                            </view>
                             <view contentMode="scaleToFill" id="Xdl-t4-4iY" userLabel="gridView">
                                 <rect key="frame" x="80" y="142" width="160" height="284"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -99,10 +94,24 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ISO" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="n82-3X-L9L" userLabel="isoTextLabel">
+                                <rect key="frame" x="139" y="274" width="42" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="DINCondensed-Bold" family="DIN Condensed" pointSize="11"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="5PS-f8-4Z8" userLabel="focusLabel">
                                 <rect key="frame" x="139" y="274" width="42" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" name="DINAlternate-Bold" family="DIN Alternate" pointSize="11"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="FOCUS" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="TuK-k9-Mp4" userLabel="focusTextLabel">
+                                <rect key="frame" x="139" y="274" width="42" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="DINCondensed-Bold" family="DIN Condensed" pointSize="11"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -134,16 +143,17 @@
                         <outlet property="centerVerticalGridSecondary1" destination="mRr-ba-Sbj" id="G4u-bY-RGr"/>
                         <outlet property="centerVerticalGridSecondary2" destination="RzA-Tl-iRV" id="IYV-Db-97M"/>
                         <outlet property="focusLabel" destination="5PS-f8-4Z8" id="aZh-EH-gIW"/>
+                        <outlet property="focusTextLabel" destination="TuK-k9-Mp4" id="0Kc-Ty-5oZ"/>
                         <outlet property="focusView" destination="DgJ-d9-Bn7" id="P4d-9L-8kt"/>
                         <outlet property="gridView" destination="Xdl-t4-4iY" id="y1i-46-gbK"/>
                         <outlet property="isoLabel" destination="UNn-9t-yKY" id="7xY-4d-XGd"/>
+                        <outlet property="isoTextLabel" destination="n82-3X-L9L" id="DlO-yx-sGj"/>
                         <outlet property="loadingIndicator" destination="X7P-DG-RKN" id="lVw-hX-w51"/>
                         <outlet property="modeButton" destination="GzD-Lz-hXh" id="M7o-ge-eq9"/>
                         <outlet property="modeLabel" destination="7Ui-1V-CBG" id="1GF-sA-5nO"/>
                         <outlet property="previewThing" destination="tSu-n3-9E1" id="s2k-Yy-Hxg"/>
                         <outlet property="previewView" destination="sVI-mX-69Q" id="UGh-um-teZ"/>
                         <outlet property="touchIndicatorX" destination="84c-PV-iNK" id="FQy-Jl-IiR"/>
-                        <outlet property="touchIndicatorXY" destination="1Fg-tQ-yI0" id="ltN-0h-FxW"/>
                         <outlet property="touchIndicatorY" destination="F5g-d8-rKz" id="Jb9-Ii-Mt9"/>
                     </connections>
                 </viewController>

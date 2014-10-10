@@ -176,9 +176,14 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_focusLabel.frame = CGRectMake(tileSize/4, screen.size.height-tileSize, tileSize, tileSize);
 	_isoLabel.frame = CGRectMake(tileSize/4 + tileSize, screen.size.height-tileSize, tileSize, tileSize);
 	
+	_focusTextLabel.frame = CGRectMake(tileSize/4, screen.size.height-tileSize-13, tileSize, tileSize);
+	_isoTextLabel.frame = CGRectMake(tileSize/4 + tileSize, screen.size.height-tileSize-13, tileSize, tileSize);
+	
 	_touchIndicatorX.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1,1 );
 	_touchIndicatorY.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1, 1);
-	_touchIndicatorXY.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1,1 );;
+	
+	_isoTextLabel.alpha = 0;
+	_focusTextLabel.alpha = 0;
 	
 	[self gridAnimationIn];
 }
@@ -250,13 +255,49 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		_focusLabel.text = [NSString stringWithFormat:@"%d%%", (int)([_videoDevice lensPosition] * 100) ];
 		_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO]) ];
 	}
-	
-	
-	
+
 //	NSLog(@"ISO   | %f",[_videoDevice ISO]);
 //	NSLog(@"EXPOS | %lld",[_videoDevice exposureDuration].value);
 //	NSLog(@"FOCUS | %f",[_videoDevice lensPosition]);
 //	NSLog(@"APERT | %f",[_videoDevice lensAperture]);
+}
+
+-(void)lensUpdate
+{
+	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+		return;
+	}
+	
+	_isoTextLabel.alpha = 1;
+	_focusTextLabel.alpha = 1;
+	
+	NSError *error = nil;
+	
+	if ([_videoDevice lockForConfiguration:&error])
+	{
+		[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
+		[_videoDevice setFocusModeLockedWithLensPosition:(1-(movedPoint.y/screen.size.height)) completionHandler:nil];
+		
+		[self displayModeMessage:@"Manual Mode"];
+		
+		[UIView beginAnimations: @"Splash Intro" context:nil];
+		[UIView setAnimationDuration:0.1];
+		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+		_touchIndicatorX.frame = CGRectMake( movedPoint.x, screen.size.height/2, 8,1 );
+		_touchIndicatorY.frame = CGRectMake( screen.size.width/2, movedPoint.y, 1, 5);
+		_touchIndicatorX.alpha = 1;
+		_touchIndicatorY.alpha = 1;
+		
+		[UIView commitAnimations];
+		
+		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:((movedPoint.x/screen.size.width)*320)+40 completionHandler:nil];
+		
+		isReady = 0;
+	}
+	else
+	{
+		NSLog(@"%@", error);
+	}
 }
 
 -(void)captureStart
@@ -419,47 +460,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 }
 
--(void)lensUpdate
-{
-	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-		return;
-	}
-		
-	NSError *error = nil;
-	
-	if ([_videoDevice lockForConfiguration:&error])
-	{
-		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:[_videoDevice ISO] completionHandler:nil];
-		[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
-		[self displayModeMessage:@"Manual Mode"];
-		
-		[_videoDevice setFocusPointOfInterest:startPoint];
-		
-		[UIView beginAnimations: @"Splash Intro" context:nil];
-		[UIView setAnimationDuration:0.1];
-		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-		_touchIndicatorX.frame = CGRectMake( startPoint.x, screen.size.height/2, 8,1 );
-		_touchIndicatorY.frame = CGRectMake( screen.size.width/2, startPoint.y, 1, 5);
-		_touchIndicatorXY.frame = CGRectMake( startPoint.x, startPoint.y, 1, 1);
-		_touchIndicatorX.alpha = 1;
-		_touchIndicatorY.alpha = 1;
-		_touchIndicatorXY.alpha = 1;
-		[UIView commitAnimations];
-		
-		isReady = 0;
-		
-		if( [_videoDevice focusMode] == AVCaptureFocusModeAutoFocus ){
-			[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
-		}
-		else{
-			[_videoDevice setFocusMode:AVCaptureFocusModeAutoFocus];
-		}
-	}
-	else
-	{
-		NSLog(@"%@", error);
-	}
-}
 
 #pragma mark Touch
 
@@ -468,8 +468,15 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	UITouch *theTouch = [touches anyObject];
 	startPoint = [theTouch locationInView:self.focusView];
 	
-	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.75 target:self selector:@selector(lensUpdate) userInfo:nil repeats:YES];
+	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(lensUpdate) userInfo:nil repeats:YES];
 	isReady = 1;
+}
+
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	UITouch *theTouch = [touches anyObject];
+	movedPoint = [theTouch locationInView:self.focusView];
+	
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
