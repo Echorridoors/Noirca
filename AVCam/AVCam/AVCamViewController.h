@@ -89,6 +89,7 @@ NSDictionary *EXIF;
 int isRendering;
 int isAuthorized;
 int isReady;
+int isPressed;
 int modeCurrent;
 CGPoint startPoint;
 CGPoint movedPoint;
@@ -100,6 +101,8 @@ float tileSize;
 
 // Hold Trigger Timer
 NSTimer *longPressTimer;
+
+NSString *modeLens;
 
 
 

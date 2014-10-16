@@ -109,11 +109,12 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(void)start
 {
 	modeCurrent = 2;
+	isPressed = 0;
+	modeLens = @"auto";
 	
 	[self templateStart];
 	[self captureStart];
 	[self savingEnabledCheck];
-	[self updateLensDataLoop];
 }
 
 -(void)savingEnabledCheck
@@ -244,61 +245,75 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[UIView commitAnimations];
 }
 
--(void)updateLensDataLoop
-{
-	[NSTimer scheduledTimerWithTimeInterval:0.05 target:self selector:@selector(updateLensData) userInfo:nil repeats:YES];
-}
-
 -(void)updateLensData
 {
 	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
 		_focusLabel.text = [NSString stringWithFormat:@"%d%%", (int)([_videoDevice lensPosition] * 100) ];
 		_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO]) ];
+		_isoTextLabel.alpha = 1;
+		_focusTextLabel.alpha = 1;
 	}
-
-//	NSLog(@"ISO   | %f",[_videoDevice ISO]);
-//	NSLog(@"EXPOS | %lld",[_videoDevice exposureDuration].value);
-//	NSLog(@"FOCUS | %f",[_videoDevice lensPosition]);
-//	NSLog(@"APERT | %f",[_videoDevice lensAperture]);
 }
 
--(void)lensUpdate
+-(void)modeToggle
 {
-	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-		return;
-	}
-	
-	_isoTextLabel.alpha = 1;
-	_focusTextLabel.alpha = 1;
+	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) { return; }
 	
 	NSError *error = nil;
+	if(![_videoDevice lockForConfiguration:&error]){ return; }
 	
-	if ([_videoDevice lockForConfiguration:&error])
-	{
-		[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
-		[_videoDevice setFocusModeLockedWithLensPosition:(1-(movedPoint.y/screen.size.height)) completionHandler:nil];
-		
-		[self displayModeMessage:@"Manual Mode"];
-		
-		[UIView beginAnimations: @"Splash Intro" context:nil];
-		[UIView setAnimationDuration:0.1];
-		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-		_touchIndicatorX.frame = CGRectMake( movedPoint.x, screen.size.height/2, 8,1 );
-		_touchIndicatorY.frame = CGRectMake( screen.size.width/2, movedPoint.y, 1, 5);
-		_touchIndicatorX.alpha = 1;
-		_touchIndicatorY.alpha = 1;
-		
-		[UIView commitAnimations];
-		
-		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:((movedPoint.x/screen.size.width)*320)+40 completionHandler:nil];
-		
-		isReady = 0;
+	NSLog(@"Mode Toggle");
+	
+	if([modeLens isEqualToString:@"auto"]){
+		[self modeSetManual];
 	}
-	else
-	{
-		NSLog(@"%@", error);
+	else{
+		[self modeSetAuto];
 	}
+	
+	[longPressTimer invalidate];
+	isReady = 0;
 }
+
+-(void)modeSetManual
+{
+	modeLens = @"manual";
+	
+	[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
+	[_videoDevice setFocusModeLockedWithLensPosition:(1-(movedPoint.y/screen.size.height)) completionHandler:nil];
+	
+	[self displayModeMessage:@"Manual Mode"];
+	
+	[UIView beginAnimations: @"Splash Intro" context:nil];
+	[UIView setAnimationDuration:0.1];
+	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+	_touchIndicatorX.frame = CGRectMake( movedPoint.x, screen.size.height/2, 8,1 );
+	_touchIndicatorY.frame = CGRectMake( screen.size.width/2, movedPoint.y, 1, 5);
+	_touchIndicatorX.alpha = 1;
+	_touchIndicatorY.alpha = 1;
+	[UIView commitAnimations];
+	
+	[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:((movedPoint.x/screen.size.width)*320)+40 completionHandler:nil];
+}
+
+-(void)modeSetAuto
+{
+	modeLens = @"auto";
+	[self displayModeMessage:@"Automatic Mode"];
+	
+	[UIView beginAnimations: @"Splash Intro" context:nil];
+	[UIView setAnimationDuration:0.1];
+	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+	_touchIndicatorX.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1,1 );
+	_touchIndicatorY.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1, 1);
+	_touchIndicatorX.alpha = 1;
+	_touchIndicatorY.alpha = 1;
+	[UIView commitAnimations];
+	
+	[_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+	[_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+}
+
 
 -(void)captureStart
 {
@@ -468,8 +483,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	UITouch *theTouch = [touches anyObject];
 	startPoint = [theTouch locationInView:self.focusView];
 	
-	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(lensUpdate) userInfo:nil repeats:YES];
 	isReady = 1;
+	
+	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:1.00 target:self selector:@selector(modeToggle) userInfo:nil repeats:YES];
+	
+	[self updateLensData];
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -477,6 +495,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	UITouch *theTouch = [touches anyObject];
 	movedPoint = [theTouch locationInView:self.focusView];
 	
+	if( [modeLens isEqualToString:@"manual"] ){
+		[self modeSetManual];
+	}
+	
+	[longPressTimer invalidate];
+	
+	[self updateLensData];
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -484,7 +509,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	if(isReady == 1){
 		[self takePicture];
 	}
+	
 	[longPressTimer invalidate];
+	isPressed = 0;
+	
+	[self updateLensData];
 }
 
 #pragma mark Picture
