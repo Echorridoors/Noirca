@@ -14,7 +14,7 @@
 		<string>https://github.com/aliceffekt/noirca.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>AVCam/noirca.xcodeproj/project.xcworkspace</string>
+	<string>AVCam/noirca.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>CECB6B3650ECFD887676179803C5C39133DC1956</key>

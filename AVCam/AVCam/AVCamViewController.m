@@ -754,23 +754,104 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			float grayFloat = gray;
 			
 			float whiteContent = (float)grayFloat/255;
+			
 			grayFloat = (grayFloat * whiteContent * 1.25)+60;
 			
 			whiteContent = (float)grayFloat/255;
 			grayFloat = grayFloat + (whiteContent * 200.5)-80;
 			
 			grayFloat *= 1-imageAverage;
-			grayFloat += 10;
 			
 			// Cap
 			if(grayFloat > 255){ grayFloat = 255; }
-			if(grayFloat < 0){ grayFloat = 30; }
+			if(grayFloat < 0){ grayFloat = 00; }
 			
 			gray = (int)grayFloat;
 			
 			rgbaPixel[RED] = gray;
 			rgbaPixel[GREEN] = gray;
 			rgbaPixel[BLUE] = gray;
+			
+		}
+	}
+	
+	CGImageRef newImage = CGBitmapContextCreateImage(context);
+	
+	CGContextRelease(context);
+	CGColorSpaceRelease(colorSpace);
+	free(pixels);
+	
+	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
+	CGImageRelease(newImage);
+	
+	resultUIImage = [self sharpen:resultUIImage];
+	
+	return resultUIImage;
+}
+
+-(UIImage *) sharpen: (UIImage *)image {
+	
+	const int RED = 1, GREEN = 2, BLUE = 3;
+	
+	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
+	
+	int width = imageRect.size.width, height = imageRect.size.height;
+	
+	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
+	memset(pixels, 0, width * height * sizeof(uint32_t));
+	
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+	
+	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
+	
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
+			
+			uint32_t pixelTop = 0;
+			uint32_t pixelBottom = 0;
+			uint32_t pixelRight = 0;
+			uint32_t pixelLeft = 0;
+			
+			// Center
+			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
+			uint32_t center = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
+			
+			
+			if(y == 0 || x == 0){
+				rgbaPixel[RED] = center;
+				rgbaPixel[GREEN] = center;
+				rgbaPixel[BLUE] = center;
+			}
+			else{
+				// Top
+				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
+				pixelTop = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
+				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
+				pixelBottom = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
+				
+				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
+				pixelRight = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
+				
+				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
+				pixelLeft = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
+				
+				uint32_t average = (pixelTop + pixelBottom + pixelRight + pixelLeft)/4;
+				
+				uint32_t centerValue = center;
+				
+				if( centerValue > average ){
+					centerValue += (centerValue-average)*0.33;
+				}
+				
+				// Cap
+				if(centerValue > 255){ centerValue = 255; }
+				
+				rgbaPixel[RED] = centerValue;
+				rgbaPixel[GREEN] = centerValue;
+				rgbaPixel[BLUE] = centerValue;
+			}
+			
 		}
 	}
 	
@@ -784,6 +865,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	CGImageRelease(newImage);
 	
 	return resultUIImage;
+	
 }
 
 #pragma mark File Output Delegate
