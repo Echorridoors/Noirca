@@ -468,10 +468,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	else{
 		longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateLensData) userInfo:nil repeats:YES];
 	}
-	
-	[longPressTimer invalidate];
 	isPressed = 0;
-	
 }
 
 #pragma mark Picture
