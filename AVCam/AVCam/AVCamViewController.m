@@ -106,11 +106,15 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[self start];
 }
 
+#pragma mark Start
+
 -(void)start
 {
 	modeCurrent = 2;
 	isPressed = 0;
 	modeLens = @"auto";
+	
+	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateLensData) userInfo:nil repeats:YES];
 	
 	[self templateStart];
 	[self captureStart];
@@ -164,7 +168,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
 	
 	_modeLabel.frame = CGRectMake(screen.size.width-(tileSize*5), screen.size.height - tileSize, tileSize*4, tileSize);
-	_modeButton.frame = CGRectMake(0, 0, screen.size.width, 60);
+	_modeButton.frame = CGRectMake(0, screen.size.height-tileSize, screen.size.width, tileSize);
 	
 	_loadingIndicator.backgroundColor = [UIColor whiteColor];
 	_loadingIndicator.frame = CGRectMake( (screen.size.width - ((tileSize/2)+2)), (screen.size.height - ((tileSize/2)+2)), 4, 4);
@@ -249,51 +253,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
 	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
 		_focusLabel.text = [NSString stringWithFormat:@"%d%%", (int)([_videoDevice lensPosition] * 100) ];
-		_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO]) ];
+		_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO])+2 ];
 		_isoTextLabel.alpha = 1;
 		_focusTextLabel.alpha = 1;
 	}
-}
-
--(void)modeToggle
-{
-	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) { return; }
-	
-	NSError *error = nil;
-	if(![_videoDevice lockForConfiguration:&error]){ return; }
-	
-	NSLog(@"Mode Toggle");
-	
-	if([modeLens isEqualToString:@"auto"]){
-		[self modeSetManual];
-	}
-	else{
-		[self modeSetAuto];
-	}
-	
-	[longPressTimer invalidate];
-	isReady = 0;
-}
-
--(void)modeSetManual
-{
-	modeLens = @"manual";
-	
-	[_videoDevice setExposureMode:AVCaptureExposureModeLocked];
-	[_videoDevice setFocusModeLockedWithLensPosition:(1-(movedPoint.y/screen.size.height)) completionHandler:nil];
-	
-	[self displayModeMessage:@"Manual Mode"];
-	
-	[UIView beginAnimations: @"Splash Intro" context:nil];
-	[UIView setAnimationDuration:0.1];
-	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-	_touchIndicatorX.frame = CGRectMake( movedPoint.x, screen.size.height/2, 8,1 );
-	_touchIndicatorY.frame = CGRectMake( screen.size.width/2, movedPoint.y, 1, 5);
-	_touchIndicatorX.alpha = 1;
-	_touchIndicatorY.alpha = 1;
-	[UIView commitAnimations];
-	
-	[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:((movedPoint.x/screen.size.width)*320)+40 completionHandler:nil];
 }
 
 -(void)modeSetAuto
@@ -485,8 +448,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	isReady = 1;
 	
-	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:1.00 target:self selector:@selector(modeToggle) userInfo:nil repeats:YES];
-	
 	[self updateLensData];
 }
 
@@ -495,12 +456,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	UITouch *theTouch = [touches anyObject];
 	movedPoint = [theTouch locationInView:self.focusView];
 	
-	if( [modeLens isEqualToString:@"manual"] ){
-		[self modeSetManual];
-	}
-	
-	[longPressTimer invalidate];
-	
 	[self updateLensData];
 }
 
@@ -508,12 +463,15 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
 	if(isReady == 1){
 		[self takePicture];
+		[self updateLensData];
+	}
+	else{
+		longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateLensData) userInfo:nil repeats:YES];
 	}
 	
 	[longPressTimer invalidate];
 	isPressed = 0;
 	
-	[self updateLensData];
 }
 
 #pragma mark Picture
@@ -841,7 +799,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 				uint32_t centerValue = center;
 				
 				if( centerValue > average ){
-					centerValue += (centerValue-average)*0.33;
+					centerValue += (centerValue-average)*0.5;
 				}
 				
 				// Cap
@@ -1013,7 +971,47 @@ float currentVolume; //Current Volume
 
 - (IBAction)modeButton:(id)sender
 {
-//	[self audioPlayer:@"fx.click.wav"];
+	[_videoDevice lockForConfiguration:nil];
+	
+	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+		return;
+	}
+	
+	modeCurrent += 1;
+	if(modeCurrent > 4){
+		modeCurrent = 0;
+	}
+	
+	if( modeCurrent == 0 ){
+		[_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+		[_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+		_loadingIndicator.backgroundColor = [UIColor redColor];
+		[self displayModeMessage:@"ISO AUTO"];
+	}
+	if( modeCurrent == 1 ){
+		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:120 completionHandler:nil];
+		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+		_loadingIndicator.backgroundColor = [UIColor whiteColor];
+		[self displayModeMessage:@"ISO 120"];
+	}
+	if( modeCurrent == 2 ){
+		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:240 completionHandler:nil];
+		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+		_loadingIndicator.backgroundColor = [UIColor whiteColor];
+		[self displayModeMessage:@"ISO 240"];
+	}
+	if( modeCurrent == 3 ){
+		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:320 completionHandler:nil];
+		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+		_loadingIndicator.backgroundColor = [UIColor whiteColor];
+		[self displayModeMessage:@"ISO 320"];
+	}
+	if( modeCurrent == 4 ){
+		[_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+		[_videoDevice setFocusModeLockedWithLensPosition:0 completionHandler:nil];
+		_loadingIndicator.backgroundColor = [UIColor blackColor];
+		[self displayModeMessage:@"LENS MACRO"];
+	}
 }
 
 -(void)audioPlayer: (NSString *)filename;
