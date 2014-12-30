@@ -76,7 +76,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 @property (nonatomic) dispatch_queue_t sessionQueue; // Communicate with the session and other session objects on this queue.
 @property (nonatomic) AVCaptureSession *session;
 @property (nonatomic) AVCaptureDevice *videoDevice;
-//@property (nonatomic) AVCaptureMovieFileOutput *movieFileOutput;
 @property (nonatomic) AVCaptureStillImageOutput *stillImageOutput;
 
 // Utilities.
@@ -113,8 +112,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	modeCurrent = 2;
 	isPressed = 0;
 	modeLens = @"auto";
-	
-	longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateLensData) userInfo:nil repeats:YES];
 	
 	[self templateStart];
 	[self captureStart];
@@ -438,7 +435,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 }
 
-
 #pragma mark Touch
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -465,9 +461,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[self takePicture];
 		[self updateLensData];
 	}
-	else{
-		longPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateLensData) userInfo:nil repeats:YES];
-	}
+	
 	isPressed = 0;
 }
 
@@ -650,38 +644,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 }
 
 #pragma mark Filters
--(float)getImageAverage:(UIImage *)image
-{
-	const int RED = 1, GREEN = 2, BLUE = 3;
-	
-	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
-	
-	int width = imageRect.size.width, height = imageRect.size.height;
-	
-	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
-	memset(pixels, 0, width * height * sizeof(uint32_t));
-	
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
-	
-	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
-	
-	int pixelCount = 0;
-	float pixelGray = 0;
-	
-	// Find average
-	for(int y = 0; y < height; y++) {
-		for(int x = 0; x < width; x++) {
-			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t gray = (0.1*rgbaPixel[RED]+0.1*rgbaPixel[GREEN]+0.8*rgbaPixel[BLUE]);
-			pixelCount += 1;
-			pixelGray += gray;
-		}
-	}
-	
-	return (pixelGray/pixelCount)/255;
-}
-
 
 -(UIImage *) filterMode:(UIImage *)image
 {
@@ -699,8 +661,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
 	
-	float imageAverage = [self getImageAverage:image];
-	
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
@@ -715,8 +675,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			whiteContent = (float)grayFloat/255;
 			grayFloat = grayFloat + (whiteContent * 200.5)-80;
 			
-			grayFloat *= 1-imageAverage;
-			
 			// Cap
 			if(grayFloat > 255){ grayFloat = 255; }
 			if(grayFloat < 0){ grayFloat = 00; }
@@ -726,7 +684,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 			rgbaPixel[RED] = gray;
 			rgbaPixel[GREEN] = gray;
 			rgbaPixel[BLUE] = gray;
-			
 		}
 	}
 	
@@ -975,7 +932,7 @@ float currentVolume; //Current Volume
 	}
 	
 	modeCurrent += 1;
-	if(modeCurrent > 4){
+	if(modeCurrent > 5){
 		modeCurrent = 0;
 	}
 	
@@ -1003,11 +960,21 @@ float currentVolume; //Current Volume
 		_loadingIndicator.backgroundColor = [UIColor whiteColor];
 		[self displayModeMessage:@"ISO 320"];
 	}
-	if( modeCurrent == 4 ){
+	else if( modeCurrent == 4 ){
 		[_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
 		[_videoDevice setFocusModeLockedWithLensPosition:0 completionHandler:nil];
 		_loadingIndicator.backgroundColor = [UIColor blackColor];
 		[self displayModeMessage:@"LENS MACRO"];
+	}
+	if( modeCurrent == 5 ){
+		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:60 completionHandler:nil];
+		[_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+		[_videoDevice setTorchMode:AVCaptureTorchModeOn];
+		_loadingIndicator.backgroundColor = [UIColor redColor];
+		[self displayModeMessage:@"FLASH"];
+	}
+	else{
+		[_videoDevice setTorchMode:AVCaptureTorchModeOff];
 	}
 }
 
