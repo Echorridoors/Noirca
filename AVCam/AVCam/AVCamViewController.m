@@ -513,10 +513,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             CFDictionaryRef metaDict = CMCopyDictionaryOfAttachments(NULL, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
             
             EXIF = (__bridge NSDictionary*)metaDict;
-			
-            currentImageData = imageData;
-			previewImage = [self filterMode:[self imageScaledToScreen:[[UIImage alloc] initWithData:imageData]]];
-			
+            @autoreleasepool
+            {
+                currentImageData = imageData;
+                previewImage = [self filterMode:[self imageScaledToScreen:[[UIImage alloc] initWithData:imageData]]];
+            }
             [self checkLoop];
 		}
 	}];
@@ -618,24 +619,26 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     
     dispatch_async(queue, ^{
-        
-        UIImage *imageToSave = [self cropImagetoScreen:[[UIImage alloc] initWithData:imageData]];
-        
-        imageToSave = [self filterMode:imageToSave];
-
-        //imageToSave = [self cropImagetoScreen:imageToSave];
-        NSData *imgData = UIImageJPEGRepresentation(imageToSave,1);
-        NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
-        imageToSave = NULL;
-        
-        NSMutableDictionary *exifm = [exifData mutableCopy];
-        
-        //[exifm setObject:[NSNumber numberWithInt:6] forKey:@"Orientation"];
-        [[[ALAssetsLibrary alloc] init] writeImageDataToSavedPhotosAlbum:imgData metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error){
-            [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+        @autoreleasepool
+        {
+            UIImage *imageToSave = [self cropImagetoScreen:[[UIImage alloc] initWithData:imageData]];
             
-        }];
-        isRendering--;
+            imageToSave = [self filterMode:imageToSave];
+
+            //imageToSave = [self cropImagetoScreen:imageToSave];
+            NSData *imgData = UIImageJPEGRepresentation(imageToSave,1);
+            NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
+            imageToSave = NULL;
+            
+            NSMutableDictionary *exifm = [exifData mutableCopy];
+            
+            //[exifm setObject:[NSNumber numberWithInt:6] forKey:@"Orientation"];
+            [[[ALAssetsLibrary alloc] init] writeImageDataToSavedPhotosAlbum:imgData metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error){
+                [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+                
+            }];
+            isRendering--;
+        }
         
         
     });
