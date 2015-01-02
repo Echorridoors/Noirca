@@ -48,8 +48,17 @@
 #import <UIKit/UIKit.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
+#import "GPUImage.h"
+#import "NoirFilter.h"
+#import "AspectRatioCropFilter.h"
 
-@interface AVCamViewController : UIViewController
+@interface AVCamViewController : UIViewController {
+    GPUImageStillCamera* stillCamera;
+    GPUImageFilter* inputFilter;
+    GPUImageFilter* outputFilter;
+    GPUImageFilter* previewFilter;
+    GPUImageFilter* currentFilter;
+}
 @property (strong, nonatomic) IBOutlet UIImageView *previewThing;
 @property (strong, nonatomic) IBOutlet UIView *gridView;
 @property (strong, nonatomic) IBOutlet UIView *centerVerticalGrid;
@@ -83,7 +92,6 @@ CGRect screen;
 NSTimer *blink;
 NSTimer *checkLooper;
 UIImage *imageInMemory;
-NSData *currentImageData;
 UIImage *previewImage;
 NSDictionary *EXIF;
 int isRendering;

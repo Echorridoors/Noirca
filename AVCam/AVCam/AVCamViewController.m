@@ -61,7 +61,6 @@
 
 #import <MediaPlayer/MediaPlayer.h>
 
-#import "AVCamPreviewView.h"
 
 static void * CapturingStillImageContext = &CapturingStillImageContext;
 static void * RecordingContext = &RecordingContext;
@@ -70,13 +69,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 @interface AVCamViewController () <AVCaptureFileOutputRecordingDelegate>
 
 // For use in the storyboards.
-@property (nonatomic, weak) IBOutlet AVCamPreviewView *previewView;
+@property (nonatomic, weak) IBOutlet GPUImageView  *previewView;
 
 // Session management.
 @property (nonatomic) dispatch_queue_t sessionQueue; // Communicate with the session and other session objects on this queue.
-@property (nonatomic) AVCaptureSession *session;
+//@property (nonatomic) AVCaptureSession *session;
 @property (nonatomic) AVCaptureDevice *videoDevice;
-@property (nonatomic) AVCaptureStillImageOutput *stillImageOutput;
+//@property (nonatomic) AVCaptureStillImageOutput *stillImageOutput;
 
 // Utilities.
 @property (nonatomic) UIBackgroundTaskIdentifier backgroundRecordingID;
@@ -91,7 +90,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (BOOL)isSessionRunningAndDeviceAuthorized
 {
-	return [[self session] isRunning] && [self isDeviceAuthorized];
+    return [self isDeviceAuthorized];
+	//return [[self session] isRunning] && [self isDeviceAuthorized];
 }
 
 + (NSSet *)keyPathsForValuesAffectingSessionRunningAndDeviceAuthorized
@@ -115,7 +115,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	[self templateStart];
 	[self captureStart];
+    
 	[self savingEnabledCheck];
+    
+    
 }
 
 -(void)savingEnabledCheck
@@ -277,91 +280,59 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 -(void)captureStart
 {
-	// Create the AVCaptureSession
-	AVCaptureSession *session = [[AVCaptureSession alloc] init];
-    session.sessionPreset = AVCaptureSessionPresetPhoto; //gets best image quality
-	[self setSession:session];
-	
-	// Setup the preview view
-	[[self previewView] setSession:session];
-	
-	// Check for device authorization
-	[self checkDeviceAuthorizationStatus];
-	
-	// In general it is not safe to mutate an AVCaptureSession or any of its inputs, outputs, or connections from multiple threads at the same time.
-	// Why not do all of this on the main queue?
-	// -[AVCaptureSession startRunning] is a blocking call which can take a long time. We dispatch session setup to the sessionQueue so that the main queue isn't blocked (which keeps the UI responsive).
-	
-	dispatch_queue_t sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL);
-	[self setSessionQueue:sessionQueue];
-	
-	dispatch_async(sessionQueue, ^{
-		[self setBackgroundRecordingID:UIBackgroundTaskInvalid];
-		
-		NSError *error = nil;
-		
-		_videoDevice = [AVCamViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:AVCaptureDevicePositionBack];
-		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:_videoDevice error:&error];
-		
-		if (error)
-		{
-			NSLog(@"%@", error);
-		}
-		
-		if ([session canAddInput:videoDeviceInput])
-		{
-			[session addInput:videoDeviceInput];
-			//			[self setVideoDeviceInput:videoDeviceInput];
-			
-			dispatch_async(dispatch_get_main_queue(), ^{
-				// Why are we dispatching this to the main queue?
-				// Because AVCaptureVideoPreviewLayer is the backing layer for AVCamPreviewView and UIView can only be manipulated on main thread.
-				// Note: As an exception to the above rule, it is not necessary to serialize video orientation changes on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
-				
-				[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:(AVCaptureVideoOrientation)[self interfaceOrientation]];
-			});
-		}
-		
-		AVCaptureStillImageOutput *stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
-		if ([session canAddOutput:stillImageOutput])
-		{
-			[stillImageOutput setOutputSettings:@{AVVideoCodecKey : AVVideoCodecJPEG}];
-			[session addOutput:stillImageOutput];
-			[self setStillImageOutput:stillImageOutput];
-		}
-	});
+    [self checkDeviceAuthorizationStatus];
+    
+    dispatch_queue_t sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL);
+    [self setSessionQueue:sessionQueue];
+    
+
+    
+    stillCamera = [[GPUImageStillCamera alloc] initWithSessionPreset:AVCaptureSessionPresetPhoto cameraPosition:AVCaptureDevicePositionBack];
+    
+    stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
+    
+    [stillCamera removeAllTargets];
+    
+    inputFilter = [AspectRatioCropFilter new];
+    
+    outputFilter = [NoirFilter new];
+    
+    previewFilter = [NoirFilter new];
+    
+    [stillCamera addTarget:inputFilter];
+    
+    [inputFilter addTarget:previewFilter];
+    [inputFilter addTarget:outputFilter];
+    
+    [previewFilter addTarget:self.previewView];
+    
+    [previewFilter forceProcessingAtSizeRespectingAspectRatio:self.previewView.frame.size];
+    
+    [stillCamera startCameraCapture];
+    
     [self installVolume];
 	
 	[self apiContact:@"noirca":@"analytics":@"launch":@"1"];
     
     queue = dispatch_queue_create("com.XXIIVV.SaveImageQueue", NULL);
+    _videoDevice = stillCamera.inputCamera;
+    self.previewView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
 	dispatch_async([self sessionQueue], ^{
-		[self addObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:SessionRunningAndDeviceAuthorizedContext];
-		[self addObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:CapturingStillImageContext];
+		/*[self addObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:SessionRunningAndDeviceAuthorizedContext];
+		[self addObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:CapturingStillImageContext];*/
 		//		[self addObserver:self forKeyPath:@"movieFileOutput.recording" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:RecordingContext];
 		//		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(subjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
-		
-		__weak AVCamViewController *weakSelf = self;
-		[self setRuntimeErrorHandlingObserver:[[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureSessionRuntimeErrorNotification object:[self session] queue:nil usingBlock:^(NSNotification *note) {
-			AVCamViewController *strongSelf = weakSelf;
-			dispatch_async([strongSelf sessionQueue], ^{
-				// Manually restarting the session since it must have been stopped due to an error.
-				[[strongSelf session] startRunning];
-			});
-		}]];
-		[[self session] startRunning];
+
 	});
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
 	dispatch_async([self sessionQueue], ^{
-		[[self session] stopRunning];
-		
 		//		[[NSNotificationCenter defaultCenter] removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
 		[[NSNotificationCenter defaultCenter] removeObserver:[self runtimeErrorHandlingObserver]];
 		
@@ -384,7 +355,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (NSUInteger)supportedInterfaceOrientations
 {
-	return UIInterfaceOrientationMaskAll;
+	return UIInterfaceOrientationMaskPortrait;
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
@@ -501,26 +472,29 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	// Save
 	isRendering++;
+    
+    stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
+    
+    
 	
-	[[[self stillImageOutput] connectionWithMediaType:AVMediaTypeVideo] setVideoOrientation:AVCaptureVideoOrientationPortrait];
-	
-	[[self stillImageOutput] captureStillImageAsynchronouslyFromConnection:[[self stillImageOutput] connectionWithMediaType:AVMediaTypeVideo] completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
-		
-		if (imageDataSampleBuffer)
-		{
-			NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-			
-            CFDictionaryRef metaDict = CMCopyDictionaryOfAttachments(NULL, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
-            
-            EXIF = (__bridge NSDictionary*)metaDict;
+    [stillCamera capturePhotoAsImageProcessedUpToFilter:outputFilter withCompletionHandler:^(UIImage *processedImage, NSError *error) {
+        if (processedImage)
+        {
             @autoreleasepool
             {
-                currentImageData = imageData;
-                previewImage = [self filterMode:[self imageScaledToScreen:[[UIImage alloc] initWithData:imageData]]];
+                [UIView beginAnimations: @"Splash Intro" context:nil];
+                [UIView setAnimationDuration:0.5];
+                [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+                _previewThing.alpha = 1;
+                [UIView commitAnimations];
+                self.previewThing.image = [self imageScaledToScreen:processedImage];
+                
+                [self saveImage:processedImage withMode:0 andEXIF:[stillCamera currentCaptureMetadata]];
             }
-            [self checkLoop];
-		}
-	}];
+        }
+    }];
+    
+    
 	
 	[self gridAnimationOut];
 	[self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
@@ -539,12 +513,12 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     CGRect rect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]), CGImageGetHeight([image CGImage]));
     
-    float currentRatio = rect.size.height/rect.size.width;
+    float currentRatio = rect.size.width/rect.size.height;
     
     if(currentRatio>ratio) {
-        float newheight = rect.size.width*ratio;
-        rect.origin.y = (rect.size.height-newheight)/2;
-        rect.size.height = newheight;
+        float newwidth = rect.size.height*ratio;
+        rect.origin.x = (rect.size.width-newwidth)/2;
+        rect.size.width = newwidth;
     }
     
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], rect);
@@ -591,24 +565,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 -(void)checkLoop
 {
 	// Ready
-	if( currentImageData != NULL){
+	/*if( imageInMemory != NULL){*/
 		
-		[UIView beginAnimations: @"Splash Intro" context:nil];
-		[UIView setAnimationDuration:0.5];
-		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-		_previewThing.alpha = 1;
-		[UIView commitAnimations];
 		
-		self.previewThing.image = previewImage;
-
-        [self saveImage:currentImageData withMode:modeCurrent andEXIF:EXIF];
-        currentImageData=NULL;
+        /*[self saveImage:imageInMemory withMode:modeCurrent andEXIF:EXIF];
 		imageInMemory = NULL;
-	}
+        previewImage = NULL;
+	}*/
 	NSLog(@"check");
 }
 
--(void)saveImage:(NSData*)imageData withMode:(int)mode andEXIF:(NSDictionary*)exifData
+-(void)saveImage:(UIImage*)imageData withMode:(int)mode andEXIF:(NSDictionary*)exifData
 {
 	UIBackgroundTaskIdentifier bgTask = UIBackgroundTaskInvalid;
     bgTask =   [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
@@ -621,23 +588,20 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     dispatch_async(queue, ^{
         @autoreleasepool
         {
-            UIImage *imageToSave = [self cropImagetoScreen:[[UIImage alloc] initWithData:imageData]];
-            
-            imageToSave = [self filterMode:imageToSave];
-
-            //imageToSave = [self cropImagetoScreen:imageToSave];
-            NSData *imgData = UIImageJPEGRepresentation(imageToSave,1);
-            NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
-            imageToSave = NULL;
-            
+            //NSData *imgData = UIImageJPEGRepresentation([self cropImagetoScreen:imageData],1);
+            //NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
+    
             NSMutableDictionary *exifm = [exifData mutableCopy];
             
-            //[exifm setObject:[NSNumber numberWithInt:6] forKey:@"Orientation"];
-            [[[ALAssetsLibrary alloc] init] writeImageDataToSavedPhotosAlbum:imgData metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error){
+            [exifm setObject:[NSNumber numberWithInt:0] forKey:@"Orientation"];
+            
+            [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageData CGImage] metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error) {
                 [[UIApplication sharedApplication] endBackgroundTask:bgTask];
-                
+                isRendering--;
             }];
-            isRendering--;
+            
+            
+            
         }
         
         
@@ -781,49 +745,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	return resultUIImage;
 	
-}
-
-#pragma mark File Output Delegate
-
-- (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)error
-{
-	if (error)
-		NSLog(@"%@", error);
-	
-	[self setLockInterfaceRotation:NO];
-	
-	// Note the backgroundRecordingID for use in the ALAssetsLibrary completion handler to end the background task associated with this recording. This allows a new recording to be started, associated with a new UIBackgroundTaskIdentifier, once the movie file output's -isRecording is back to NO — which happens sometime after this method returns.
-	UIBackgroundTaskIdentifier backgroundRecordingID = [self backgroundRecordingID];
-	[self setBackgroundRecordingID:UIBackgroundTaskInvalid];
-	
-	[[[ALAssetsLibrary alloc] init] writeVideoAtPathToSavedPhotosAlbum:outputFileURL completionBlock:^(NSURL *assetURL, NSError *error) {
-		if (error)
-			NSLog(@"%@", error);
-		
-		[[NSFileManager defaultManager] removeItemAtURL:outputFileURL error:nil];
-		
-		if (backgroundRecordingID != UIBackgroundTaskInvalid)
-			[[UIApplication sharedApplication] endBackgroundTask:backgroundRecordingID];
-	}];
-}
-
-#pragma mark Device Configuration
-
-+ (AVCaptureDevice *)deviceWithMediaType:(NSString *)mediaType preferringPosition:(AVCaptureDevicePosition)position
-{
-	NSArray *devices = [AVCaptureDevice devicesWithMediaType:mediaType];
-	AVCaptureDevice *captureDevice = [devices firstObject];
-	
-	for (AVCaptureDevice *device in devices)
-	{
-		if ([device position] == position)
-		{
-			captureDevice = device;
-			break;
-		}
-	}
-	
-	return captureDevice;
 }
 
 #pragma mark UI
