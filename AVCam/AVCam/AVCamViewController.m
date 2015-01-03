@@ -62,27 +62,18 @@
 #import <MediaPlayer/MediaPlayer.h>
 
 
-static void * CapturingStillImageContext = &CapturingStillImageContext;
-static void * RecordingContext = &RecordingContext;
-static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDeviceAuthorizedContext;
-
-@interface AVCamViewController () <AVCaptureFileOutputRecordingDelegate>
+@interface AVCamViewController ()
 
 // For use in the storyboards.
 @property (nonatomic, weak) IBOutlet GPUImageView  *previewView;
 
 // Session management.
 @property (nonatomic) dispatch_queue_t sessionQueue; // Communicate with the session and other session objects on this queue.
-//@property (nonatomic) AVCaptureSession *session;
 @property (nonatomic) AVCaptureDevice *videoDevice;
-//@property (nonatomic) AVCaptureStillImageOutput *stillImageOutput;
 
 // Utilities.
-@property (nonatomic) UIBackgroundTaskIdentifier backgroundRecordingID;
 @property (nonatomic, getter = isDeviceAuthorized) BOOL deviceAuthorized;
 @property (nonatomic, readonly, getter = isSessionRunningAndDeviceAuthorized) BOOL sessionRunningAndDeviceAuthorized;
-@property (nonatomic) BOOL lockInterfaceRotation;
-@property (nonatomic) id runtimeErrorHandlingObserver;
 
 @end
 
@@ -90,8 +81,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (BOOL)isSessionRunningAndDeviceAuthorized
 {
-    return [self isDeviceAuthorized];
-	//return [[self session] isRunning] && [self isDeviceAuthorized];
+	return stillCamera.captureSession.isRunning && [self isDeviceAuthorized];
 }
 
 + (NSSet *)keyPathsForValuesAffectingSessionRunningAndDeviceAuthorized
@@ -326,29 +316,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     self.previewView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
 }
 
-- (void)viewWillAppear:(BOOL)animated
-{
-	dispatch_async([self sessionQueue], ^{
-		/*[self addObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:SessionRunningAndDeviceAuthorizedContext];
-		[self addObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:CapturingStillImageContext];*/
-		//		[self addObserver:self forKeyPath:@"movieFileOutput.recording" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:RecordingContext];
-		//		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(subjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
-
-	});
-}
-
-- (void)viewDidDisappear:(BOOL)animated
-{
-	dispatch_async([self sessionQueue], ^{
-		//		[[NSNotificationCenter defaultCenter] removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:[[self videoDeviceInput] device]];
-		[[NSNotificationCenter defaultCenter] removeObserver:[self runtimeErrorHandlingObserver]];
-		
-		[self removeObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" context:SessionRunningAndDeviceAuthorizedContext];
-		[self removeObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" context:CapturingStillImageContext];
-		[self removeObserver:self forKeyPath:@"movieFileOutput.recording" context:RecordingContext];
-	});
-}
-
 - (BOOL)prefersStatusBarHidden
 {
 	return YES;
@@ -356,8 +323,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (BOOL)shouldAutorotate
 {
-	// Disable autorotation of the interface when recording is in progress.
-	return ![self lockInterfaceRotation];
+    return false;
 }
 
 - (NSUInteger)supportedInterfaceOrientations
@@ -368,49 +334,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
 	[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-	if (context == CapturingStillImageContext)
-	{
-		BOOL isCapturingStillImage = [change[NSKeyValueChangeNewKey] boolValue];
-		
-		if (isCapturingStillImage)
-		{
-			[self runStillImageCaptureAnimation];
-		}
-	}
-	else if (context == RecordingContext)
-	{
-		BOOL isRecording = [change[NSKeyValueChangeNewKey] boolValue];
-		
-		dispatch_async(dispatch_get_main_queue(), ^{
-			if (isRecording)
-			{
-			}
-			else
-			{
-			}
-		});
-	}
-	else if (context == SessionRunningAndDeviceAuthorizedContext)
-	{
-		BOOL isRunning = [change[NSKeyValueChangeNewKey] boolValue];
-		
-		dispatch_async(dispatch_get_main_queue(), ^{
-			if (isRunning)
-			{
-			}
-			else
-			{
-			}
-		});
-	}
-	else
-	{
-		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-	}
 }
 
 #pragma mark Touch
@@ -482,31 +405,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	isRendering++;
     
     stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
-	/*[stillCamera capturePhotoAsJPEGProcessedUpToFilter:outputFilter withOrientation:UIImageOrientationUp withCompletionHandler:^(NSData *processedJPEG, NSError *error) {
-        if (!error)
-        {
-            dispatch_async(queue, ^{
-                @autoreleasepool
-                {
-                    dispatch_async(dispatch_get_main_queue(), ^ {
-                        @autoreleasepool
-                        {
-                            [UIView beginAnimations: @"Splash Intro" context:nil];
-                            [UIView setAnimationDuration:0.5];
-                            [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-                            _previewThing.alpha = 1;
-                            [UIView commitAnimations];
-                            self.previewThing.image = [self imageScaledToScreen:[UIImage imageWithData:processedJPEG]];
-                        }
-                    });
-                    
-                    [self saveImage:processedJPEG withMode:0 andEXIF:[stillCamera currentCaptureMetadata]];
-                    
-                }
-            });
-        }
-
-    }];*/
     
     [inputFilter addTarget:noirOutputFilter];
     
@@ -546,30 +444,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	
 	// save
 	[[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
-}
-
-- (UIImage *)cropImagetoScreen:(UIImage *)image
-{
-    //CGRect CropRect = CGRectMake(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height+15);
-    CGSize screenSize =[[UIScreen mainScreen] bounds].size;
-    
-    float ratio = screenSize.width/screenSize.height;
-    
-    CGRect rect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]), CGImageGetHeight([image CGImage]));
-    
-    float currentRatio = rect.size.width/rect.size.height;
-    
-    if(currentRatio>ratio) {
-        float newwidth = rect.size.height*ratio;
-        rect.origin.x = (rect.size.width-newwidth)/2;
-        rect.size.width = newwidth;
-    }
-    
-    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], rect);
-    UIImage *cropped = [UIImage imageWithCGImage:imageRef scale:1.0 orientation:UIImageOrientationUp];
-    CGImageRelease(imageRef);
-    
-    return cropped;
 }
 
 -(UIImage*)imageScaledToScreen: (UIImage*) sourceImage
@@ -630,19 +504,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[UIView commitAnimations];
 }
 
--(void)checkLoop
-{
-	// Ready
-	/*if( imageInMemory != NULL){*/
-		
-		
-        /*[self saveImage:imageInMemory withMode:modeCurrent andEXIF:EXIF];
-		imageInMemory = NULL;
-        previewImage = NULL;
-	}*/
-	NSLog(@"check");
-}
-
 -(void)saveImage:(NSData*)imageData withMode:(int)mode andEXIF:(NSDictionary*)exifData
 {
 	UIBackgroundTaskIdentifier bgTask = UIBackgroundTaskInvalid;
@@ -657,9 +518,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     dispatch_async(queue, ^{
         @autoreleasepool
         {
-            //NSData *imgData = UIImageJPEGRepresentation([self cropImagetoScreen:imageData],1);
-            //NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
-            
             NSMutableDictionary *exifm = [exifData mutableCopy];
             
             [exifm setObject:[NSNumber numberWithInt:0] forKey:@"Orientation"];
@@ -668,158 +526,14 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                 [[UIApplication sharedApplication] endBackgroundTask:bgTask];
                 isRendering--;
             }];
-            
-            /*[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageData CGImage] metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error) {
-                [[UIApplication sharedApplication] endBackgroundTask:bgTask];
-                isRendering--;
-            }];*/
-            
-            
-            
+
         }
         
         
     });
-    
-	/*[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageInMemory CGImage] orientation:(ALAssetOrientation)[imageInMemory imageOrientation] completionBlock:nil];*/
 }
 
-#pragma mark Filters
 
--(UIImage *) filterMode:(UIImage *)image
-{
-	const int RED = 1, GREEN = 2, BLUE = 3;
-	
-	CGRect imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
-	
-	int width = imageRect.size.width, height = imageRect.size.height;
-	
-	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
-	memset(pixels, 0, width * height * sizeof(uint32_t));
-	
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
-	
-	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
-	
-	for(int y = 0; y < height; y++) {
-		for(int x = 0; x < width; x++) {
-			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t gray = (0.0*rgbaPixel[RED]+0.0*rgbaPixel[GREEN]+0.9*rgbaPixel[BLUE]);
-			
-			float grayFloat = gray;
-			
-			float whiteContent = (float)grayFloat/255;
-			
-			grayFloat = (grayFloat * whiteContent * 1.25)+60;
-			
-			whiteContent = (float)grayFloat/255;
-			grayFloat = grayFloat + (whiteContent * 200.5)-80;
-			
-			// Cap
-			if(grayFloat > 255){ grayFloat = 255; }
-			if(grayFloat < 0){ grayFloat = 00; }
-			
-			gray = (int)grayFloat;
-			
-			rgbaPixel[RED] = gray;
-			rgbaPixel[GREEN] = gray;
-			rgbaPixel[BLUE] = gray;
-		}
-	}
-	
-	CGImageRef newImage = CGBitmapContextCreateImage(context);
-	
-	CGContextRelease(context);
-	CGColorSpaceRelease(colorSpace);
-	free(pixels);
-	
-	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
-	CGImageRelease(newImage);
-	
-	resultUIImage = [self sharpen:resultUIImage];
-	
-	return resultUIImage;
-}
-
--(UIImage *) sharpen: (UIImage *)image {
-	
-	const int RED = 1, GREEN = 2, BLUE = 3;
-	
-	CGRect imageRect = CGRectMake(0, 0, CGImageGetWidth([image CGImage]),  CGImageGetHeight([image CGImage]));
-	
-	int width = imageRect.size.width, height = imageRect.size.height;
-	
-	uint32_t * pixels = (uint32_t *) malloc(width*height*sizeof(uint32_t));
-	memset(pixels, 0, width * height * sizeof(uint32_t));
-	
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	CGContextRef context = CGBitmapContextCreate(pixels, width, height, 8, width * sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
-	
-	CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
-	
-	for(int y = 0; y < height; y++) {
-		for(int x = 0; x < width; x++) {
-			
-			uint32_t pixelTop = 0;
-			uint32_t pixelBottom = 0;
-			uint32_t pixelRight = 0;
-			uint32_t pixelLeft = 0;
-			
-			// Center
-			uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
-			uint32_t center = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
-			
-			
-			if(y == 0 || x == 0){
-				rgbaPixel[RED] = center;
-				rgbaPixel[GREEN] = center;
-				rgbaPixel[BLUE] = center;
-			}
-			else{
-				// Top
-				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
-				pixelTop = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
-				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
-				pixelBottom = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
-				
-				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
-				pixelRight = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
-				
-				rgbaPixel = (uint8_t *) & pixels[(y-1)*width+x];
-				pixelLeft = (0.33*rgbaPixel[RED]+0.33*rgbaPixel[GREEN]+0.33*rgbaPixel[BLUE]);
-				
-				uint32_t average = (pixelTop + pixelBottom + pixelRight + pixelLeft)/4;
-				
-				uint32_t centerValue = center;
-				
-				if( centerValue > average ){
-					centerValue += (centerValue-average)*0.5;
-				}
-				
-				// Cap
-				if(centerValue > 255){ centerValue = 255; }
-				
-				rgbaPixel[RED] = centerValue;
-				rgbaPixel[GREEN] = centerValue;
-				rgbaPixel[BLUE] = centerValue;
-			}
-			
-		}
-	}
-	
-	CGImageRef newImage = CGBitmapContextCreateImage(context);
-	
-	CGContextRelease(context);
-	CGColorSpaceRelease(colorSpace);
-	free(pixels);
-	
-	UIImage * resultUIImage = [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationUp];
-	CGImageRelease(newImage);
-	
-	return resultUIImage;
-	
-}
 
 #pragma mark UI
 
