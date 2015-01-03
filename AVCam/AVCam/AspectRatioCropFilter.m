@@ -12,7 +12,7 @@
 
 - (void)setInputSize:(CGSize)newSize atIndex:(NSInteger)textureIndex;
 {
-    CGSize tempsize = newSize;
+    CGSize tempSize = newSize;
     if(newSize.width!=lastInputSize.width || newSize.height!=lastInputSize.height) {
         lastInputSize = newSize;
         CGSize screenSize =[[UIScreen mainScreen] bounds].size;
@@ -25,10 +25,12 @@
             float newwidth = newSize.height*ratio;
             //rect.origin.x = (rect.size.width-newwidth)/2;
             newSize.width = newwidth;
+            
+            self.cropRegion = CGRectMake(0.0+(tempSize.width-newSize.width)/(tempSize.width*2), 0, (newSize.width)/(tempSize.width), 1.0);
         }
     }
     
-    [super setInputSize:tempsize atIndex:textureIndex];
+    [super setInputSize:tempSize atIndex:textureIndex];
     
 }
 

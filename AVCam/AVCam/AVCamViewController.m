@@ -295,18 +295,25 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     inputFilter = [AspectRatioCropFilter new];
     
-    outputFilter = [NoirFilter new];
+    noirOutputFilter = [NoirFilter new];
+    sharpOutputFilter = [NoirSharpFilter new];
     
-    previewFilter = [NoirFilter new];
+    noirPreviewFilter = [NoirFilter new];
+    sharpPreviewFilter = [NoirSharpFilter new];
     
     [stillCamera addTarget:inputFilter];
     
-    [inputFilter addTarget:previewFilter];
-    [inputFilter addTarget:outputFilter];
+    [inputFilter addTarget:noirPreviewFilter];
     
-    [previewFilter addTarget:self.previewView];
     
-    [previewFilter forceProcessingAtSizeRespectingAspectRatio:self.previewView.frame.size];
+    [noirPreviewFilter addTarget:sharpPreviewFilter];
+    
+    [sharpPreviewFilter addTarget:self.previewView];
+    
+    [noirPreviewFilter forceProcessingAtSizeRespectingAspectRatio:CGSizeMake(self.previewView.frame.size.width*2, self.previewView.frame.size.width*2)];
+    
+    [noirOutputFilter addTarget:sharpOutputFilter];
+    
     
     [stillCamera startCameraCapture];
     
@@ -445,10 +452,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[self displayModeMessage:@"Authorize Noirca: Settings -> Privacy -> Photos"];
 		return;
 	}
-	if( isRendering > 2 ){  //disallow if the user has already taken 3 images
-		[self displayModeMessage:@"wait"];
-		return;
-	}
 
 	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
 	
@@ -467,6 +470,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[self displayModeMessage:@"Ready"];
 		return;
 	}
+    
+    if( isRendering > 0 || capturing ){  //disallow if the user has already taken 3 images
+        [self displayModeMessage:@"wait"];
+        return;
+    }
 	
 	_previewThing.alpha = 0;
 	
@@ -474,24 +482,60 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	isRendering++;
     
     stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
+	/*[stillCamera capturePhotoAsJPEGProcessedUpToFilter:outputFilter withOrientation:UIImageOrientationUp withCompletionHandler:^(NSData *processedJPEG, NSError *error) {
+        if (!error)
+        {
+            dispatch_async(queue, ^{
+                @autoreleasepool
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^ {
+                        @autoreleasepool
+                        {
+                            [UIView beginAnimations: @"Splash Intro" context:nil];
+                            [UIView setAnimationDuration:0.5];
+                            [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+                            _previewThing.alpha = 1;
+                            [UIView commitAnimations];
+                            self.previewThing.image = [self imageScaledToScreen:[UIImage imageWithData:processedJPEG]];
+                        }
+                    });
+                    
+                    [self saveImage:processedJPEG withMode:0 andEXIF:[stillCamera currentCaptureMetadata]];
+                    
+                }
+            });
+        }
+
+    }];*/
     
+    [inputFilter addTarget:noirOutputFilter];
     
-	
-    [stillCamera capturePhotoAsImageProcessedUpToFilter:outputFilter withCompletionHandler:^(UIImage *processedImage, NSError *error) {
+    capturing = true;
+    [stillCamera capturePhotoAsImageProcessedUpToFilter:sharpOutputFilter withOrientation:UIImageOrientationUp withCompletionHandler:^(UIImage *processedImage, NSError *error) {
+        [inputFilter removeTarget:noirOutputFilter];
         if (processedImage)
         {
-            @autoreleasepool
-            {
-                [UIView beginAnimations: @"Splash Intro" context:nil];
-                [UIView setAnimationDuration:0.5];
-                [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-                _previewThing.alpha = 1;
-                [UIView commitAnimations];
-                self.previewThing.image = [self imageScaledToScreen:processedImage];
-                
-                [self saveImage:processedImage withMode:0 andEXIF:[stillCamera currentCaptureMetadata]];
-            }
+            dispatch_async(queue, ^{
+                @autoreleasepool
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^ {
+                        @autoreleasepool
+                        {
+                        [UIView beginAnimations: @"Splash Intro" context:nil];
+                        [UIView setAnimationDuration:0.5];
+                        [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+                        _previewThing.alpha = 1;
+                        [UIView commitAnimations];
+                        self.previewThing.image = [self imageScaledToScreen:processedImage];
+                        }
+                    });
+                    
+                    [self saveImage:UIImageJPEGRepresentation(processedImage, 1.0) withMode:0 andEXIF:[stillCamera currentCaptureMetadata]];
+                    
+                }
+            });
         }
+        capturing = false;
     }];
     
     
@@ -538,14 +582,38 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     float newWidth = sourceImage.size.width * scaleFactor;
     float newHeight = screenHeight;
     
-    UIGraphicsBeginImageContext(CGSizeMake(newWidth, newHeight));
+    /*UIGraphicsBeginImageContext(CGSizeMake(newWidth, newHeight));
     [sourceImage drawInRect:CGRectMake(0, 0, newWidth, newHeight)];
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+    return newImage;*/
+    
+    CGImageRef imageRef = sourceImage.CGImage;
+    
+    // Build a context that's the same dimensions as the new size
+    CGContextRef bitmap = CGBitmapContextCreate(NULL,
+                                                newWidth,
+                                                newHeight,
+                                                CGImageGetBitsPerComponent(imageRef),
+                                                0,
+                                                CGImageGetColorSpace(imageRef),
+                                                CGImageGetBitmapInfo(imageRef));
+    
+    // Rotate and/or flip the image if required by its orientation
+    //CGContextConcatCTM(bitmap, transform);
+    
+    // Draw into the context; this scales the image
+    CGContextDrawImage(bitmap, CGRectMake(0, 0, newWidth, newHeight), imageRef);
+    
+    // Get the resized image from the context and a UIImage
+    CGImageRef newImageRef = CGBitmapContextCreateImage(bitmap);
+    UIImage *newImage = [UIImage imageWithCGImage:newImageRef];
+    
+    // Clean up
+    CGContextRelease(bitmap);
+    CGImageRelease(newImageRef);
+    
     return newImage;
-    /*return [UIImage imageWithCGImage:[newImage CGImage]
-                               scale:1.0
-                         orientation: UIImageOrientationRight];*/
 }
 
 -(void)displayModeMessage :(NSString*)message
@@ -575,7 +643,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	NSLog(@"check");
 }
 
--(void)saveImage:(UIImage*)imageData withMode:(int)mode andEXIF:(NSDictionary*)exifData
+-(void)saveImage:(NSData*)imageData withMode:(int)mode andEXIF:(NSDictionary*)exifData
 {
 	UIBackgroundTaskIdentifier bgTask = UIBackgroundTaskInvalid;
     bgTask =   [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
@@ -585,20 +653,26 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     }];
     
     
+    
     dispatch_async(queue, ^{
         @autoreleasepool
         {
             //NSData *imgData = UIImageJPEGRepresentation([self cropImagetoScreen:imageData],1);
             //NSLog(@"Size of Image(bytes): %lu",(unsigned long)[imgData length]);
-    
+            
             NSMutableDictionary *exifm = [exifData mutableCopy];
             
             [exifm setObject:[NSNumber numberWithInt:0] forKey:@"Orientation"];
             
-            [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageData CGImage] metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error) {
+            [[[ALAssetsLibrary alloc] init] writeImageDataToSavedPhotosAlbum:imageData metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error) {
                 [[UIApplication sharedApplication] endBackgroundTask:bgTask];
                 isRendering--;
             }];
+            
+            /*[[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[imageData CGImage] metadata:exifm completionBlock:^(NSURL *assetURL, NSError *error) {
+                [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+                isRendering--;
+            }];*/
             
             
             

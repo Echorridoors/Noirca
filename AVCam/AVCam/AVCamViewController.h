@@ -50,14 +50,17 @@
 #import <AVFoundation/AVFoundation.h>
 #import "GPUImage.h"
 #import "NoirFilter.h"
+#import "NoirSharpFilter.h"
 #import "AspectRatioCropFilter.h"
 
 @interface AVCamViewController : UIViewController {
     GPUImageStillCamera* stillCamera;
     GPUImageFilter* inputFilter;
-    GPUImageFilter* outputFilter;
-    GPUImageFilter* previewFilter;
-    GPUImageFilter* currentFilter;
+    GPUImageFilter* sharpOutputFilter;
+    GPUImageFilter* sharpPreviewFilter;
+    GPUImageFilter* noirPreviewFilter;
+    GPUImageFilter* noirOutputFilter;
+    BOOL capturing;
 }
 @property (strong, nonatomic) IBOutlet UIImageView *previewThing;
 @property (strong, nonatomic) IBOutlet UIView *gridView;
