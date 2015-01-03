@@ -12,25 +12,30 @@
 
 - (void)setInputSize:(CGSize)newSize atIndex:(NSInteger)textureIndex;
 {
-    CGSize tempSize = newSize;
+    
+    
+    CGSize rotatedSize = [self rotatedSize:newSize forIndex:textureIndex];
+    
+    CGSize tempSize = rotatedSize;
+    
     if(newSize.width!=lastInputSize.width || newSize.height!=lastInputSize.height) {
         lastInputSize = newSize;
-        CGSize screenSize =[[UIScreen mainScreen] bounds].size;
-        
-        float ratio = screenSize.width/screenSize.height;
-        
-        float currentRatio = newSize.width/newSize.height;
-        
-        if(currentRatio>ratio) {
-            float newwidth = newSize.height*ratio;
-            //rect.origin.x = (rect.size.width-newwidth)/2;
-            newSize.width = newwidth;
+            CGSize screenSize =[[UIScreen mainScreen] bounds].size;
             
-            self.cropRegion = CGRectMake(0.0+(tempSize.width-newSize.width)/(tempSize.width*2), 0, (newSize.width)/(tempSize.width), 1.0);
-        }
+            float ratio = screenSize.width/screenSize.height;
+            
+            float currentRatio = rotatedSize.width/rotatedSize.height;
+            
+            if(currentRatio>ratio) {
+                float newwidth = rotatedSize.height*ratio;
+                //rect.origin.x = (rect.size.width-newwidth)/2;
+                rotatedSize.width = newwidth;
+                float start = (tempSize.width-rotatedSize.width)/(tempSize.width*2);
+                self.cropRegion = CGRectMake(start, 0, 1.0 - (start*2), 1.0);
+            }
     }
     
-    [super setInputSize:tempSize atIndex:textureIndex];
+    [super setInputSize:newSize atIndex:textureIndex];
     
 }
 
