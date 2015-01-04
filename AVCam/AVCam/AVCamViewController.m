@@ -275,36 +275,39 @@
     dispatch_queue_t sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL);
     [self setSessionQueue:sessionQueue];
     
-
-    
-    stillCamera = [[GPUImageStillCamera alloc] initWithSessionPreset:AVCaptureSessionPresetPhoto cameraPosition:AVCaptureDevicePositionBack];
-    
-    stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
-    
-    [stillCamera removeAllTargets];
-    
-    inputFilter = [AspectRatioCropFilter new];
-    
-    noirOutputFilter = [NoirFilter new];
-    sharpOutputFilter = [NoirSharpFilter new];
-    
-    [stillCamera addTarget:inputFilter];
-    
-    [inputFilter addTarget:noirOutputFilter];
-    
-    [noirOutputFilter addTarget:sharpOutputFilter];
-    
-    [sharpOutputFilter addTarget:self.previewView];
-    
-    [stillCamera startCameraCapture];
+    //Setting up filters takes a little while do it in a background queue where it won't block
+    dispatch_async(sessionQueue, ^{
+        stillCamera = [[GPUImageStillCamera alloc] initWithSessionPreset:AVCaptureSessionPresetPhoto cameraPosition:AVCaptureDevicePositionBack];
+        
+        stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
+        
+        [stillCamera removeAllTargets];
+        
+        inputFilter = [AspectRatioCropFilter new];
+        
+        noirOutputFilter = [NoirFilter new];
+        sharpOutputFilter = [NoirSharpFilter new];
+        
+        [stillCamera addTarget:inputFilter];
+        
+        [inputFilter addTarget:noirOutputFilter];
+        
+        [noirOutputFilter addTarget:sharpOutputFilter];
+        
+        [sharpOutputFilter addTarget:self.previewView];
+        
+        [stillCamera startCameraCapture];
+        
+        _videoDevice = stillCamera.inputCamera;
+        self.previewView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
+    });
     
     [self installVolume];
 	
 	[self apiContact:@"noirca":@"analytics":@"launch":@"1"];
     
     queue = dispatch_queue_create("com.XXIIVV.SaveImageQueue", NULL);
-    _videoDevice = stillCamera.inputCamera;
-    self.previewView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
+    
 }
 
 - (BOOL)prefersStatusBarHidden
