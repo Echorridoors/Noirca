@@ -57,8 +57,6 @@
     GPUImageStillCamera* stillCamera;
     GPUImageFilter* inputFilter;
     GPUImageFilter* sharpOutputFilter;
-    GPUImageFilter* sharpPreviewFilter;
-    GPUImageFilter* noirPreviewFilter;
     GPUImageFilter* noirOutputFilter;
     BOOL capturing;
 }

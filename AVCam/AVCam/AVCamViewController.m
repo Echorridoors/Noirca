@@ -288,22 +288,13 @@
     noirOutputFilter = [NoirFilter new];
     sharpOutputFilter = [NoirSharpFilter new];
     
-    noirPreviewFilter = [NoirFilter new];
-    sharpPreviewFilter = [NoirSharpFilter new];
-    
     [stillCamera addTarget:inputFilter];
     
-    [inputFilter addTarget:noirPreviewFilter];
-    
-    
-    [noirPreviewFilter addTarget:sharpPreviewFilter];
-    
-    [sharpPreviewFilter addTarget:self.previewView];
-    
-    [noirPreviewFilter forceProcessingAtSizeRespectingAspectRatio:CGSizeMake(self.previewView.frame.size.width*2, self.previewView.frame.size.width*2)];
+    [inputFilter addTarget:noirOutputFilter];
     
     [noirOutputFilter addTarget:sharpOutputFilter];
     
+    [sharpOutputFilter addTarget:self.previewView];
     
     [stillCamera startCameraCapture];
     
@@ -406,11 +397,8 @@
     
     stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
     
-    [inputFilter addTarget:noirOutputFilter];
-    
     capturing = true;
     [stillCamera capturePhotoAsImageProcessedUpToFilter:sharpOutputFilter withOrientation:UIImageOrientationUp withCompletionHandler:^(UIImage *processedImage, NSError *error) {
-        [inputFilter removeTarget:noirOutputFilter];
         if (processedImage)
         {
             dispatch_async(queue, ^{
