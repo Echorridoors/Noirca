@@ -22,7 +22,7 @@
 		580D3EFD195CC7CD00EC0E4B /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 580D3EFC195CC7CD00EC0E4B /* MediaPlayer.framework */; };
 		580D3F00195CCC5700EC0E4B /* silence.wav in Resources */ = {isa = PBXBuildFile; fileRef = 580D3EFF195CCC5700EC0E4B /* silence.wav */; };
 		58451D7A1A55F6A100DAF4FD /* NoirFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 58451D791A55F6A100DAF4FD /* NoirFilter.m */; };
-		58451D7D1A567A6E00DAF4FD /* AspectRatioCropFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 58451D7C1A567A6E00DAF4FD /* AspectRatioCropFilter.m */; };
+		58451D7D1A567A6E00DAF4FD /* ScreenAspectRatioCropFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 58451D7C1A567A6E00DAF4FD /* ScreenAspectRatioCropFilter.m */; };
 		5871E2311A57B8E5003898BD /* NoirSharpFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 5871E2301A57B8E5003898BD /* NoirSharpFilter.m */; };
 		587F7180742DB1625E8535E2 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BB0BAE36FF47C9B04678B08 /* libPods.a */; };
 /* End PBXBuildFile section */
@@ -50,8 +50,8 @@
 		580D3EFF195CCC5700EC0E4B /* silence.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = silence.wav; sourceTree = "<group>"; };
 		58451D781A55F6A100DAF4FD /* NoirFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoirFilter.h; sourceTree = "<group>"; };
 		58451D791A55F6A100DAF4FD /* NoirFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoirFilter.m; sourceTree = "<group>"; };
-		58451D7B1A567A6E00DAF4FD /* AspectRatioCropFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AspectRatioCropFilter.h; sourceTree = "<group>"; };
-		58451D7C1A567A6E00DAF4FD /* AspectRatioCropFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AspectRatioCropFilter.m; sourceTree = "<group>"; };
+		58451D7B1A567A6E00DAF4FD /* ScreenAspectRatioCropFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScreenAspectRatioCropFilter.h; sourceTree = "<group>"; };
+		58451D7C1A567A6E00DAF4FD /* ScreenAspectRatioCropFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScreenAspectRatioCropFilter.m; sourceTree = "<group>"; };
 		5871E22F1A57B8E5003898BD /* NoirSharpFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoirSharpFilter.h; sourceTree = "<group>"; };
 		5871E2301A57B8E5003898BD /* NoirSharpFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoirSharpFilter.m; sourceTree = "<group>"; };
 		92AA93EE505A27266A67229E /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -104,8 +104,8 @@
 				2F360BB517692C4700D9A404 /* AVCamAppDelegate.m */,
 				2F360BBD17692C4700D9A404 /* AVCamViewController.h */,
 				2F360BBE17692C4700D9A404 /* AVCamViewController.m */,
-				58451D7B1A567A6E00DAF4FD /* AspectRatioCropFilter.h */,
-				58451D7C1A567A6E00DAF4FD /* AspectRatioCropFilter.m */,
+				58451D7B1A567A6E00DAF4FD /* ScreenAspectRatioCropFilter.h */,
+				58451D7C1A567A6E00DAF4FD /* ScreenAspectRatioCropFilter.m */,
 				58451D781A55F6A100DAF4FD /* NoirFilter.h */,
 				58451D791A55F6A100DAF4FD /* NoirFilter.m */,
 				5871E22F1A57B8E5003898BD /* NoirSharpFilter.h */,
@@ -265,7 +265,7 @@
 			files = (
 				2F360BB217692C4700D9A404 /* main.m in Sources */,
 				58451D7A1A55F6A100DAF4FD /* NoirFilter.m in Sources */,
-				58451D7D1A567A6E00DAF4FD /* AspectRatioCropFilter.m in Sources */,
+				58451D7D1A567A6E00DAF4FD /* ScreenAspectRatioCropFilter.m in Sources */,
 				2F360BBF17692C4700D9A404 /* AVCamViewController.m in Sources */,
 				5871E2311A57B8E5003898BD /* NoirSharpFilter.m in Sources */,
 				2F360BB617692C4700D9A404 /* AVCamAppDelegate.m in Sources */,

@@ -283,7 +283,7 @@
         
         [stillCamera removeAllTargets];
         
-        inputFilter = [AspectRatioCropFilter new];
+        inputFilter = [ScreenAspectRatioCropFilter new];
         
         noirOutputFilter = [NoirFilter new];
         sharpOutputFilter = [NoirSharpFilter new];

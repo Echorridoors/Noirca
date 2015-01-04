@@ -51,7 +51,7 @@
 #import "GPUImage.h"
 #import "NoirFilter.h"
 #import "NoirSharpFilter.h"
-#import "AspectRatioCropFilter.h"
+#import "ScreenAspectRatioCropFilter.h"
 
 @interface AVCamViewController : UIViewController {
     GPUImageStillCamera* stillCamera;
