@@ -45,12 +45,6 @@
  
  */
 
-#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
-#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
-
 #import "AVCamViewController.h"
 
 #import <AVFoundation/AVFoundation.h>
@@ -241,7 +235,7 @@
 
 -(void)updateLensData
 {
-	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+    if([_videoDevice respondsToSelector:@selector(lensPosition)] && [_videoDevice respondsToSelector:@selector(exposureDuration)] ) {
 		_focusLabel.text = [NSString stringWithFormat:@"%d%%", (int)([_videoDevice lensPosition] * 100) ];
 		_isoLabel.text = [NSString stringWithFormat:@"%d", (int)([_videoDevice ISO])+2 ];
 		_isoTextLabel.alpha = 1;
@@ -300,8 +294,10 @@
         
         _videoDevice = stillCamera.inputCamera;
         self.previewView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
-        [_videoDevice addObserver:self forKeyPath:@"lensPosition" options:NSKeyValueObservingOptionNew context:nil];
-        [_videoDevice addObserver:self forKeyPath:@"ISO" options:NSKeyValueObservingOptionNew context:nil];
+        if([_videoDevice respondsToSelector:@selector(lensPosition)]) {
+            [_videoDevice addObserver:self forKeyPath:@"lensPosition" options:NSKeyValueObservingOptionNew context:nil];
+            [_videoDevice addObserver:self forKeyPath:@"ISO" options:NSKeyValueObservingOptionNew context:nil];
+        }
     });
     
     [self installVolume];
@@ -639,7 +635,7 @@ float currentVolume; //Current Volume
 {
 	[_videoDevice lockForConfiguration:nil];
 	
-	if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+	if(![_videoDevice respondsToSelector:@selector(lensPosition)] || ![_videoDevice respondsToSelector:@selector(exposureDuration)] ) {
 		return;
 	}
 	
