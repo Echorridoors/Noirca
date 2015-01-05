@@ -86,6 +86,7 @@
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
 	[self start];
 }
 
