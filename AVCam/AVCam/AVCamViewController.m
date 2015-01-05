@@ -300,6 +300,8 @@
         
         _videoDevice = stillCamera.inputCamera;
         self.previewView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
+        [_videoDevice addObserver:self forKeyPath:@"lensPosition" options:NSKeyValueObservingOptionNew context:nil];
+        [_videoDevice addObserver:self forKeyPath:@"ISO" options:NSKeyValueObservingOptionNew context:nil];
     });
     
     [self installVolume];
@@ -308,6 +310,13 @@
     
     queue = dispatch_queue_create("com.XXIIVV.SaveImageQueue", NULL);
     
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if([keyPath isEqualToString:@"lensPosition"] || [keyPath isEqualToString:@"ISO"]) {
+        [self updateLensData];
+    }
 }
 
 - (BOOL)prefersStatusBarHidden
