@@ -690,10 +690,10 @@ float currentVolume; //Current Volume
         [self displayModeMessage:@"LENS MACRO"];
     }
     if( modeCurrent == 5 ){
-        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:60 completionHandler:nil];
+        [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
         [_videoDevice setTorchMode:AVCaptureTorchModeOn];
-        _loadingIndicator.backgroundColor = [UIColor redColor];
+        _loadingIndicator.backgroundColor = [UIColor cyanColor];
         [self displayModeMessage:@"FLASH"];
     }
     else{
