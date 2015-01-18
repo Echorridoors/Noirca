@@ -48,8 +48,40 @@
 #import <UIKit/UIKit.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
+#import "GPUImage.h"
+#import "NoirFilter.h"
+#import "NoirSharpFilter.h"
+#import "ScreenAspectRatioCropFilter.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 
-@interface AVCamViewController : UIViewController
+@interface AVCamViewController : UIViewController {
+    GPUImageStillCamera* stillCamera;
+    GPUImageFilter* inputFilter;
+    GPUImageFilter* sharpOutputFilter;
+    GPUImageFilter* noirOutputFilter;
+    BOOL capturing;
+    
+    CGRect screen;
+    NSTimer *blink;
+    NSTimer *checkLooper;
+    int isRendering;
+    int isAuthorized;
+    int isReady;
+    int isPressed;
+    int modeCurrent;
+    CGPoint startPoint;
+    CGPoint movedPoint;
+    AVAudioPlayer * audioPlayer;
+    dispatch_queue_t queue;
+    
+    ALAssetsLibrary * lib;
+    float tileSize;
+    
+    // Hold Trigger Timer
+    NSTimer *longPressTimer;
+    
+    NSString *modeLens;
+}
 @property (strong, nonatomic) IBOutlet UIImageView *previewThing;
 @property (strong, nonatomic) IBOutlet UIView *gridView;
 @property (strong, nonatomic) IBOutlet UIView *centerVerticalGrid;
@@ -78,31 +110,6 @@
 - (IBAction)modeButton:(id)sender;
 
 @end
-
-CGRect screen;
-NSTimer *blink;
-NSTimer *checkLooper;
-UIImage *imageInMemory;
-NSData *currentImageData;
-UIImage *previewImage;
-NSDictionary *EXIF;
-int isRendering;
-int isAuthorized;
-int isReady;
-int isPressed;
-int modeCurrent;
-CGPoint startPoint;
-CGPoint movedPoint;
-AVAudioPlayer * audioPlayer;
-dispatch_queue_t queue;
-
-CGRect screen;
-float tileSize;
-
-// Hold Trigger Timer
-NSTimer *longPressTimer;
-
-NSString *modeLens;
 
 
 

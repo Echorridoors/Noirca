@@ -1,28 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="vXZ-lx-hvc">
     <dependencies>
         <deployment identifier="iOS"/>
         <development version="5000" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
     </dependencies>
     <scenes>
         <!--Cam View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
                 <viewController id="vXZ-lx-hvc" customClass="AVCamViewController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
+                    <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS" customClass="GPUImageView">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" id="sVI-mX-69Q" customClass="AVCamPreviewView">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <gestureRecognizers/>
-                                <connections>
-                                    <outletCollection property="gestureRecognizers" destination="ONs-ko-ZrA" appends="YES" id="c3S-iC-ZUa"/>
-                                </connections>
-                            </view>
                             <view contentMode="scaleToFill" id="fsv-kg-R1t" userLabel="blackScreenView">
                                 <rect key="frame" x="80" y="142" width="160" height="284"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -152,17 +143,13 @@
                         <outlet property="modeButton" destination="GzD-Lz-hXh" id="M7o-ge-eq9"/>
                         <outlet property="modeLabel" destination="7Ui-1V-CBG" id="1GF-sA-5nO"/>
                         <outlet property="previewThing" destination="tSu-n3-9E1" id="s2k-Yy-Hxg"/>
-                        <outlet property="previewView" destination="sVI-mX-69Q" id="UGh-um-teZ"/>
+                        <outlet property="previewView" destination="kh9-bI-dsS" id="icV-lo-rXU"/>
                         <outlet property="touchIndicatorX" destination="84c-PV-iNK" id="FQy-Jl-IiR"/>
                         <outlet property="touchIndicatorY" destination="F5g-d8-rKz" id="Jb9-Ii-Mt9"/>
+                        <outlet property="view" destination="kh9-bI-dsS" id="AUL-mY-Tj4"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer id="ONs-ko-ZrA">
-                    <connections>
-                        <action selector="focusAndExposeTap:" destination="vXZ-lx-hvc" id="bOd-u9-SrO"/>
-                    </connections>
-                </tapGestureRecognizer>
             </objects>
         </scene>
     </scenes>
