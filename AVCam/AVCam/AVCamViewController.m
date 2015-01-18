@@ -48,7 +48,6 @@
 #import "AVCamViewController.h"
 
 #import <AVFoundation/AVFoundation.h>
-#import <AssetsLibrary/AssetsLibrary.h>
 #import <ImageIO/CGImageSource.h>
 #import <ImageIO/CGImageProperties.h>
 
@@ -265,6 +264,8 @@
 
 -(void)captureStart
 {
+    [stillCamera stopCameraCapture];
+    [stillCamera removeAllTargets];
     [self checkDeviceAuthorizationStatus];
     
     dispatch_queue_t sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL);
@@ -379,7 +380,7 @@
 	int pictureCount = [[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"] intValue];
 	
 	// Remove preview image
-	if( self.previewThing.image != NULL ){
+	if( self.previewThing.image ){
 		[UIView beginAnimations: @"Splash Intro" context:nil];
 		[UIView setAnimationDuration:1];
 		[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
@@ -394,7 +395,7 @@
 		return;
 	}
     
-    if( isRendering > 0 || capturing ){  //disallow if the user has already taken 3 images
+    if( isRendering > 0 || capturing  || !stillCamera.captureSession.isRunning){  //disallow if the user has already taken two images
         [self displayModeMessage:@"wait"];
         return;
     }
@@ -402,7 +403,7 @@
 	_previewThing.alpha = 0;
 	
 	// Save
-	isRendering++;
+	
     
     stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
     
@@ -410,37 +411,48 @@
     [stillCamera capturePhotoAsImageProcessedUpToFilter:sharpOutputFilter withOrientation:UIImageOrientationUp withCompletionHandler:^(UIImage *processedImage, NSError *error) {
         if (processedImage)
         {
+            
             dispatch_async(queue, ^{
                 @autoreleasepool
                 {
                     dispatch_async(dispatch_get_main_queue(), ^ {
                         @autoreleasepool
                         {
-                        [UIView beginAnimations: @"Splash Intro" context:nil];
-                        [UIView setAnimationDuration:0.5];
-                        [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-                        _previewThing.alpha = 1;
-                        [UIView commitAnimations];
-                        self.previewThing.image = [self imageScaledToScreen:processedImage];
+                            
+                            [UIView animateWithDuration:0.5 animations:^{
+                                _previewThing.alpha = 1;
+                            } completion:^(BOOL finished) {
+                                capturing = false;
+                            }];
+                            self.previewThing.image = [self imageScaledToScreen:processedImage];
+                            [self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
+                            [[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
+                            
                         }
                     });
-                    
+                    [self clearBuffers];
                     [self saveImage:UIImageJPEGRepresentation(processedImage, 1.0) withMode:0 andEXIF:[stillCamera currentCaptureMetadata]];
-                    
                 }
             });
         }
-        capturing = false;
+        if(error) {
+            isRendering--;
+            capturing=false;
+        }
     }];
     
-    
-	
 	[self gridAnimationOut];
-	[self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
+	
 	_blackScreenView.alpha = 1;
 	
-	// save
-	[[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
+}
+
+-(void) clearBuffers
+{
+    [stillCamera stopCameraCapture];
+    [[GPUImageContext sharedFramebufferCache] purgeAllUnassignedFramebuffers];
+    [stillCamera startCameraCapture];
+    [self changeMode:0];
 }
 
 -(UIImage*)imageScaledToScreen: (UIImage*) sourceImage
@@ -510,8 +522,6 @@
         [[UIApplication sharedApplication] endBackgroundTask:bgTask];
     }];
     
-    
-    
     dispatch_async(queue, ^{
         @autoreleasepool
         {
@@ -523,10 +533,7 @@
                 [[UIApplication sharedApplication] endBackgroundTask:bgTask];
                 isRendering--;
             }];
-
         }
-        
-        
     });
 }
 
@@ -634,57 +641,64 @@ float currentVolume; //Current Volume
 
 - (IBAction)modeButton:(id)sender
 {
-	[_videoDevice lockForConfiguration:nil];
-	
-	if(![_videoDevice respondsToSelector:@selector(lensPosition)] || ![_videoDevice respondsToSelector:@selector(exposureDuration)] ) {
-		return;
-	}
-	
-	modeCurrent += 1;
-	if(modeCurrent > 5){
-		modeCurrent = 0;
-	}
-	
-	if( modeCurrent == 0 ){
-		[_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
-		[_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-		_loadingIndicator.backgroundColor = [UIColor redColor];
-		[self displayModeMessage:@"ISO AUTO"];
-	}
-	if( modeCurrent == 1 ){
-		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:120 completionHandler:nil];
-		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
-		_loadingIndicator.backgroundColor = [UIColor whiteColor];
-		[self displayModeMessage:@"ISO 120"];
-	}
-	if( modeCurrent == 2 ){
-		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:240 completionHandler:nil];
-		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
-		_loadingIndicator.backgroundColor = [UIColor whiteColor];
-		[self displayModeMessage:@"ISO 240"];
-	}
-	if( modeCurrent == 3 ){
-		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:320 completionHandler:nil];
-		[_videoDevice setFocusMode:AVCaptureFocusModeLocked];
-		_loadingIndicator.backgroundColor = [UIColor whiteColor];
-		[self displayModeMessage:@"ISO 320"];
-	}
-	else if( modeCurrent == 4 ){
-		[_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
-		[_videoDevice setFocusModeLockedWithLensPosition:0 completionHandler:nil];
-		_loadingIndicator.backgroundColor = [UIColor blackColor];
-		[self displayModeMessage:@"LENS MACRO"];
-	}
-	if( modeCurrent == 5 ){
-		[_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:60 completionHandler:nil];
-		[_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-		[_videoDevice setTorchMode:AVCaptureTorchModeOn];
-		_loadingIndicator.backgroundColor = [UIColor redColor];
-		[self displayModeMessage:@"FLASH"];
-	}
-	else{
-		[_videoDevice setTorchMode:AVCaptureTorchModeOff];
-	}
+    [self changeMode:1];
+}
+
+-(void)changeMode:(int)increment {
+    [_videoDevice lockForConfiguration:nil];
+    
+    if(![_videoDevice respondsToSelector:@selector(lensPosition)] || ![_videoDevice respondsToSelector:@selector(exposureDuration)] ) {
+        return;
+    }
+    
+    modeCurrent += increment;
+    if(modeCurrent < 0 ) {
+        modeCurrent = 0;
+    }
+    if(modeCurrent > 5){
+        modeCurrent = 0;
+    }
+    
+    if( modeCurrent == 0 ){
+        [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+        [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+        _loadingIndicator.backgroundColor = [UIColor redColor];
+        [self displayModeMessage:@"ISO AUTO"];
+    }
+    if( modeCurrent == 1 ){
+        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:120 completionHandler:nil];
+        [_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+        _loadingIndicator.backgroundColor = [UIColor whiteColor];
+        [self displayModeMessage:@"ISO 120"];
+    }
+    if( modeCurrent == 2 ){
+        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:240 completionHandler:nil];
+        [_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+        _loadingIndicator.backgroundColor = [UIColor whiteColor];
+        [self displayModeMessage:@"ISO 240"];
+    }
+    if( modeCurrent == 3 ){
+        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:320 completionHandler:nil];
+        [_videoDevice setFocusMode:AVCaptureFocusModeLocked];
+        _loadingIndicator.backgroundColor = [UIColor whiteColor];
+        [self displayModeMessage:@"ISO 320"];
+    }
+    else if( modeCurrent == 4 ){
+        [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+        [_videoDevice setFocusModeLockedWithLensPosition:0 completionHandler:nil];
+        _loadingIndicator.backgroundColor = [UIColor blackColor];
+        [self displayModeMessage:@"LENS MACRO"];
+    }
+    if( modeCurrent == 5 ){
+        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:60 completionHandler:nil];
+        [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+        [_videoDevice setTorchMode:AVCaptureTorchModeOn];
+        _loadingIndicator.backgroundColor = [UIColor redColor];
+        [self displayModeMessage:@"FLASH"];
+    }
+    else{
+        [_videoDevice setTorchMode:AVCaptureTorchModeOff];
+    }
 }
 
 -(void)audioPlayer: (NSString *)filename;
