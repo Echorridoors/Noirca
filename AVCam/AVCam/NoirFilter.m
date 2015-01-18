@@ -17,9 +17,9 @@ NSString *const noirFilter = SHADER_STRING
 {
     lowp vec4 textureColor = texture2D(inputImageTexture, textureCoordinate);
     
-    lowp float gray = textureColor.r;
-    gray = (gray * gray * 1.25) + .235;
-    gray = (gray * 1.786) - 0.314;
+    lowp float gray = (textureColor.r + textureColor.b) * .5;
+    gray = (gray * gray * 1.15) + .435;
+    gray = (gray * 1.486) - 0.514;
     gray = clamp(gray,0.0,1.0);
     gl_FragColor = vec4(gray,gray,gray,1.0);
 }
