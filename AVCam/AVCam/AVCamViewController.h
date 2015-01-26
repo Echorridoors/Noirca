@@ -102,6 +102,9 @@
 @property (strong, nonatomic) IBOutlet UILabel *focusLabel;
 @property (strong, nonatomic) IBOutlet UILabel *isoTextLabel;
 @property (strong, nonatomic) IBOutlet UILabel *focusTextLabel;
+@property (weak, nonatomic) IBOutlet UILabel *rollLabel;
+@property (weak, nonatomic) IBOutlet UILabel *rollTextLabel;
+@property (weak, nonatomic) IBOutlet UILabel *modeTextLabel;
 
 @property (strong, nonatomic) IBOutlet UIView *loadingIndicator;
 @property (strong, nonatomic) IBOutlet UIView *touchIndicatorX;

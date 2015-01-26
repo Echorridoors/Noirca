@@ -93,16 +93,15 @@
 
 -(void)start
 {
-	modeCurrent = 2;
+	modeCurrent = 0;
 	isPressed = 0;
 	modeLens = @"auto";
 	
 	[self templateStart];
 	[self captureStart];
     
+    [self changeMode:0];
 	[self savingEnabledCheck];
-    
-    
 }
 
 -(void)savingEnabledCheck
@@ -140,7 +139,7 @@
 	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, screen.size.height/2, 1, 1);
 	
 	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
-	_centerHorizontalGridSecondary1.frame = CGRectMake(0, 0, screen.size.width, 1);
+	_centerHorizontalGridSecondary1.frame = CGRectMake(0, 0, 0, 1);
 	
 	_centerHorizontalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
 	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, screen.size.height, screen.size.width, 1);
@@ -151,23 +150,27 @@
 	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0];
 	_centerVerticalGridSecondary2.frame = CGRectMake(screen.size.width, 0, 1, screen.size.height);
 	
-	_modeLabel.frame = CGRectMake(screen.size.width-(tileSize*5), screen.size.height - tileSize, tileSize*4, tileSize);
-	_modeButton.frame = CGRectMake(0, screen.size.height-tileSize, screen.size.width, tileSize);
-	
 	_loadingIndicator.backgroundColor = [UIColor whiteColor];
-	_loadingIndicator.frame = CGRectMake( (screen.size.width - ((tileSize/2)+2)), (screen.size.height - ((tileSize/2)+2)), 4, 4);
-	_loadingIndicator.layer.cornerRadius = 2.5;
+	_loadingIndicator.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1, 1);
 	
 	_touchIndicatorX.backgroundColor = [UIColor whiteColor];
 	_touchIndicatorX.frame = CGRectMake( (screen.size.width - tileSize)+ 15, (screen.size.height - tileSize)+ 15, 5, 5);
 	_touchIndicatorX.layer.cornerRadius = 2.5;
-	
+    
+    _focusTextLabel.frame = CGRectMake(tileSize/4, screen.size.height-tileSize-13, tileSize, tileSize);
 	_focusLabel.frame = CGRectMake(tileSize/4, screen.size.height-tileSize, tileSize, tileSize);
-	_isoLabel.frame = CGRectMake(tileSize/4 + tileSize, screen.size.height-tileSize, tileSize, tileSize);
-	
-	_focusTextLabel.frame = CGRectMake(tileSize/4, screen.size.height-tileSize-13, tileSize, tileSize);
-	_isoTextLabel.frame = CGRectMake(tileSize/4 + tileSize, screen.size.height-tileSize-13, tileSize, tileSize);
-	
+    
+    _isoTextLabel.frame = CGRectMake(tileSize/4 + tileSize, screen.size.height-tileSize-13, tileSize, tileSize);
+    _isoLabel.frame = CGRectMake(tileSize/4 + tileSize, screen.size.height-tileSize, tileSize, tileSize);
+    
+    _rollTextLabel.frame = CGRectMake(tileSize/4 + (tileSize*6), screen.size.height-tileSize-13, tileSize, tileSize);
+    _rollLabel.frame = CGRectMake(tileSize/4 + (tileSize*6), screen.size.height-tileSize, tileSize, tileSize);
+    _rollLabel.text = [NSString stringWithFormat:@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"]];
+    
+    _modeTextLabel.frame = CGRectMake(tileSize/4 + (tileSize*7), screen.size.height-tileSize-13, tileSize, tileSize);
+    _modeLabel.frame = CGRectMake(tileSize/4 + (tileSize*7), screen.size.height-tileSize, tileSize, tileSize);
+    _modeButton.frame = CGRectMake(0, screen.size.height-tileSize, screen.size.width, tileSize);
+    
 	_touchIndicatorX.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1,1 );
 	_touchIndicatorY.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1, 1);
 	
@@ -192,16 +195,16 @@
 	_centerVerticalGrid.frame = CGRectMake(screen.size.width/2, 0, 1, screen.size.height);
 	
 	_centerHorizontalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerHorizontalGridSecondary1.frame = CGRectMake(0, screen.size.height/3, screen.size.width, 1);
+	_centerHorizontalGridSecondary1.frame = CGRectMake(0, (screen.size.height/2) - (2*tileSize), screen.size.width, 1);
 	
 	_centerHorizontalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, (screen.size.height/3)*2, screen.size.width, 1);
+	_centerHorizontalGridSecondary2.frame = CGRectMake( 0, (screen.size.height/2) + (2*tileSize), screen.size.width, 1);
 	
 	_centerVerticalGridSecondary1.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerVerticalGridSecondary1.frame = CGRectMake(screen.size.width/3, 0, 1, screen.size.height);
+	_centerVerticalGridSecondary1.frame = CGRectMake(tileSize*3, 0, 1, screen.size.height);
 	
 	_centerVerticalGridSecondary2.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	_centerVerticalGridSecondary2.frame = CGRectMake((screen.size.width/3)*2, 0, 1, screen.size.height);
+	_centerVerticalGridSecondary2.frame = CGRectMake(tileSize*5, 0, 1, screen.size.height);
 	
 	[UIView commitAnimations];
 }
@@ -373,7 +376,7 @@
 {
 	if( isAuthorized == 0 ){
 		[self savingEnabledCheck];
-		[self displayModeMessage:@"Authorize Noirca: Settings -> Privacy -> Photos"];
+		[self displayModeMessage:@"--"];
 		return;
 	}
 
@@ -391,7 +394,6 @@
 		self.previewThing.image = NULL;
 	
 		[self gridAnimationIn];
-		[self displayModeMessage:@"Ready"];
 		return;
 	}
     
@@ -404,7 +406,6 @@
 	
 	// Save
 	
-    
     stillCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
     
     capturing = true;
@@ -425,9 +426,7 @@
                                 capturing = false;
                             }];
                             self.previewThing.image = [self imageScaledToScreen:processedImage];
-                            [self displayModeMessage:[NSString stringWithFormat:@"%d",pictureCount]];
                             [[NSUserDefaults standardUserDefaults] setInteger:pictureCount+1 forKey:@"photoCount"];
-                            
                         }
                     });
                     [self clearBuffers];
@@ -442,6 +441,8 @@
     }];
     
 	[self gridAnimationOut];
+    
+    _rollLabel.text = [NSString stringWithFormat:@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"photoCount"]];
 	
 	_blackScreenView.alpha = 1;
 	
@@ -501,14 +502,14 @@
 
 -(void)displayModeMessage :(NSString*)message
 {
-	_modeLabel.alpha = 1;
+	_modeLabel.alpha = 0;
 	_modeLabel.text = message;
 	
 	[UIView beginAnimations: @"Splash Intro" context:nil];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-	[UIView setAnimationDelay:2];
+	[UIView setAnimationDelay:0];
 	[UIView setAnimationDuration:0.5];
-	_modeLabel.alpha = 0;
+	_modeLabel.alpha = 1;
 	_loadingIndicator.alpha = 1;
 	[UIView commitAnimations];
 }
@@ -655,46 +656,34 @@ float currentVolume; //Current Volume
     if(modeCurrent < 0 ) {
         modeCurrent = 0;
     }
-    if(modeCurrent > 5 || (modeCurrent > 4 && !_videoDevice.torchAvailable)){
+    if(modeCurrent > 3 || (modeCurrent > 2 && !_videoDevice.torchAvailable)){
         modeCurrent = 0;
     }
     
     if( modeCurrent == 0 ){
         [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-        _loadingIndicator.backgroundColor = [UIColor redColor];
-        [self displayModeMessage:@"ISO AUTO"];
+        _modeLabel.textColor = [UIColor redColor];
+        [self displayModeMessage:@"A"];
     }
     if( modeCurrent == 1 ){
-        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:120 completionHandler:nil];
+        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:60 completionHandler:nil];
         [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
         _loadingIndicator.backgroundColor = [UIColor whiteColor];
-        [self displayModeMessage:@"ISO 120"];
+        [self displayModeMessage:@"Q"];
     }
-    if( modeCurrent == 2 ){
-        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:240 completionHandler:nil];
-        [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-        _loadingIndicator.backgroundColor = [UIColor whiteColor];
-        [self displayModeMessage:@"ISO 240"];
-    }
-    if( modeCurrent == 3 ){
-        [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:320 completionHandler:nil];
-        [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-        _loadingIndicator.backgroundColor = [UIColor whiteColor];
-        [self displayModeMessage:@"ISO 320"];
-    }
-    else if( modeCurrent == 4 ){
+    else if( modeCurrent == 2 ){
         [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         [_videoDevice setFocusModeLockedWithLensPosition:0 completionHandler:nil];
         _loadingIndicator.backgroundColor = [UIColor blackColor];
-        [self displayModeMessage:@"LENS MACRO"];
+        [self displayModeMessage:@"M"];
     }
-    if( modeCurrent == 5 ){
+    if( modeCurrent == 3 ){
         [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
         [_videoDevice setTorchMode:AVCaptureTorchModeOn];
         _loadingIndicator.backgroundColor = [UIColor cyanColor];
-        [self displayModeMessage:@"FLASH"];
+        [self displayModeMessage:@"F"];
     }
     else{
         if(_videoDevice.torchAvailable)
