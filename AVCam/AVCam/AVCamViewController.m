@@ -95,13 +95,15 @@
 {
 	modeCurrent = 0;
 	isPressed = 0;
-	modeLens = @"auto";
 	
 	[self templateStart];
 	[self captureStart];
     
     [self changeMode:0];
 	[self savingEnabledCheck];
+    
+    [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+    [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
 }
 
 -(void)savingEnabledCheck
@@ -245,25 +247,6 @@
 		_focusTextLabel.alpha = 1;
 	}
 }
-
--(void)modeSetAuto
-{
-	modeLens = @"auto";
-	[self displayModeMessage:@"Automatic Mode"];
-	
-	[UIView beginAnimations: @"Splash Intro" context:nil];
-	[UIView setAnimationDuration:0.1];
-	[UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
-	_touchIndicatorX.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1,1 );
-	_touchIndicatorY.frame = CGRectMake( screen.size.width/2, screen.size.height/2, 1, 1);
-	_touchIndicatorX.alpha = 1;
-	_touchIndicatorY.alpha = 1;
-	[UIView commitAnimations];
-	
-	[_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
-	[_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-}
-
 
 -(void)captureStart
 {

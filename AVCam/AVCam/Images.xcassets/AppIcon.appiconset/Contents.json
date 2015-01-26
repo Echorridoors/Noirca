@@ -34,22 +34,24 @@
     },
     {
       "idiom" : "ipad",
-      "size" : "50x50",
+      "size" : "40x40",
       "scale" : "1x"
     },
     {
       "idiom" : "ipad",
-      "size" : "50x50",
+      "size" : "40x40",
       "scale" : "2x"
     },
     {
+      "size" : "76x76",
       "idiom" : "ipad",
-      "size" : "72x72",
+      "filename" : "icon.76.png",
       "scale" : "1x"
     },
     {
+      "size" : "76x76",
       "idiom" : "ipad",
-      "size" : "72x72",
+      "filename" : "icon.152.png",
       "scale" : "2x"
     }
   ],
