@@ -655,7 +655,7 @@ float currentVolume; //Current Volume
     if(modeCurrent < 0 ) {
         modeCurrent = 0;
     }
-    if(modeCurrent > 5){
+    if(modeCurrent > 5 || (modeCurrent > 4 && !_videoDevice.torchAvailable)){
         modeCurrent = 0;
     }
     
@@ -697,7 +697,8 @@ float currentVolume; //Current Volume
         [self displayModeMessage:@"FLASH"];
     }
     else{
-        [_videoDevice setTorchMode:AVCaptureTorchModeOff];
+        if(_videoDevice.torchAvailable)
+            [_videoDevice setTorchMode:AVCaptureTorchModeOff];
     }
 }
 
