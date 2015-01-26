@@ -669,20 +669,20 @@ float currentVolume; //Current Volume
     if( modeCurrent == 1 ){
         [_videoDevice setExposureModeCustomWithDuration:[_videoDevice exposureDuration] ISO:60 completionHandler:nil];
         [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-        _loadingIndicator.backgroundColor = [UIColor whiteColor];
+        _modeLabel.textColor = [UIColor whiteColor];
         [self displayModeMessage:@"Q"];
     }
     else if( modeCurrent == 2 ){
         [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         [_videoDevice setFocusModeLockedWithLensPosition:0 completionHandler:nil];
-        _loadingIndicator.backgroundColor = [UIColor blackColor];
+        _modeLabel.textColor = [UIColor whiteColor];
         [self displayModeMessage:@"M"];
     }
     if( modeCurrent == 3 ){
         [_videoDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         [_videoDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
         [_videoDevice setTorchMode:AVCaptureTorchModeOn];
-        _loadingIndicator.backgroundColor = [UIColor cyanColor];
+        _modeLabel.textColor = [UIColor whiteColor];
         [self displayModeMessage:@"F"];
     }
     else{
