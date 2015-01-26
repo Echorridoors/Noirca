@@ -17,38 +17,16 @@ NSString *const noirFilter = SHADER_STRING
 {
     lowp vec4 textureColor = texture2D(inputImageTexture, textureCoordinate);
     
-    lowp float gray = (textureColor.r + textureColor.b) * .5;
+    lowp float gray = (textureColor.r) * .5;
     gray = (gray * gray * 1.15) + .435;
     gray = (gray * 1.486) - 0.514;
+    
+    gray = gray * (gray + 0.5);
     gray = clamp(gray,0.0,1.0);
+    
     gl_FragColor = vec4(gray,gray,gray,1.0);
 }
  );
-
-/*
- uint8_t * rgbaPixel = (uint8_t *) &pixels[y*width+x];
- uint32_t gray = (0.0*rgbaPixel[RED]+0.0*rgbaPixel[GREEN]+0.9*rgbaPixel[BLUE]);
- 
- float grayFloat = gray;
- 
- float whiteContent = (float)grayFloat/255;
- 
- grayFloat = (grayFloat * whiteContent * 1.25)+60;
- 
- whiteContent = (float)grayFloat/255;
- grayFloat = grayFloat + (whiteContent * 200.5)-80;
- 
- // Cap
- if(grayFloat > 255){ grayFloat = 255; }
- if(grayFloat < 0){ grayFloat = 00; }
- 
- gray = (int)grayFloat;
- 
- rgbaPixel[RED] = gray;
- rgbaPixel[GREEN] = gray;
- rgbaPixel[BLUE] = gray;
- */
- 
 
 @implementation NoirFilter
 
