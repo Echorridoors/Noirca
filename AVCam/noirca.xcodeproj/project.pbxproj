@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		031B7E02195CB7FE0065963C /* icon.120.png in Resources */ = {isa = PBXBuildFile; fileRef = 031B7E01195CB7FE0065963C /* icon.120.png */; };
 		0367E4A41966272D00CF5708 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0367E4A31966272D00CF5708 /* AVFoundation.framework */; };
 		0367E4A61966273D00CF5708 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0367E4A51966273D00CF5708 /* AudioToolbox.framework */; };
 		0367E4A81966274200CF5708 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0367E4A71966274200CF5708 /* CoreAudio.framework */; };
@@ -19,6 +18,7 @@
 		2F360BBF17692C4700D9A404 /* AVCamViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F360BBE17692C4700D9A404 /* AVCamViewController.m */; };
 		2F360BC117692C4700D9A404 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BC017692C4700D9A404 /* Images.xcassets */; };
 		2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2F360BB717692C4700D9A404 /* Main_iPhone.storyboard */; };
+		5776DE8F1C1725E700F3C41B /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5776DE8E1C1725E700F3C41B /* Launch Screen.storyboard */; };
 		580D3EFD195CC7CD00EC0E4B /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 580D3EFC195CC7CD00EC0E4B /* MediaPlayer.framework */; };
 		580D3F00195CCC5700EC0E4B /* silence.wav in Resources */ = {isa = PBXBuildFile; fileRef = 580D3EFF195CCC5700EC0E4B /* silence.wav */; };
 		58451D7A1A55F6A100DAF4FD /* NoirFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 58451D791A55F6A100DAF4FD /* NoirFilter.m */; };
@@ -28,7 +28,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		031B7E01195CB7FE0065963C /* icon.120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.120.png; sourceTree = "<group>"; };
 		0367E4A31966272D00CF5708 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		0367E4A51966273D00CF5708 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		0367E4A71966274200CF5708 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -44,8 +43,8 @@
 		2F360BBD17692C4700D9A404 /* AVCamViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AVCamViewController.h; sourceTree = "<group>"; };
 		2F360BBE17692C4700D9A404 /* AVCamViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVCamViewController.m; sourceTree = "<group>"; };
 		2F360BC017692C4700D9A404 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		2F90F0AD178E8C450015CE45 /* ReadMe.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
 		3BB0BAE36FF47C9B04678B08 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		5776DE8E1C1725E700F3C41B /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		580D3EFC195CC7CD00EC0E4B /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		580D3EFF195CCC5700EC0E4B /* silence.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = silence.wav; sourceTree = "<group>"; };
 		58451D781A55F6A100DAF4FD /* NoirFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoirFilter.h; sourceTree = "<group>"; };
@@ -78,8 +77,6 @@
 			isa = PBXGroup;
 			children = (
 				580D3EFE195CC7D800EC0E4B /* Frameworks */,
-				031B7E01195CB7FE0065963C /* icon.120.png */,
-				2F90F0AD178E8C450015CE45 /* ReadMe.txt */,
 				580D3EFF195CCC5700EC0E4B /* silence.wav */,
 				2F360BAB17692C4700D9A404 /* AVCam */,
 				2F360BA317692C4700D9A404 /* Products */,
@@ -111,6 +108,7 @@
 				5871E22F1A57B8E5003898BD /* NoirSharpFilter.h */,
 				5871E2301A57B8E5003898BD /* NoirSharpFilter.m */,
 				2F360BB717692C4700D9A404 /* Main_iPhone.storyboard */,
+				5776DE8E1C1725E700F3C41B /* Launch Screen.storyboard */,
 				2F360BC017692C4700D9A404 /* Images.xcassets */,
 				2F360BAC17692C4700D9A404 /* Supporting Files */,
 			);
@@ -177,7 +175,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = AVC;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Apple Inc";
 				TargetAttributes = {
 					2F360BA117692C4700D9A404 = {
@@ -218,8 +216,8 @@
 				0367E4AA196627EB00CF5708 /* fx.click.wav in Resources */,
 				2F360BB017692C4700D9A404 /* InfoPlist.strings in Resources */,
 				2F45C1D5177676670052A7F9 /* Main_iPhone.storyboard in Resources */,
-				031B7E02195CB7FE0065963C /* icon.120.png in Resources */,
 				03AC729719CC5549001A148D /* tile.png in Resources */,
+				5776DE8F1C1725E700F3C41B /* Launch Screen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,6 +311,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -371,12 +370,13 @@
 			baseConfigurationReference = 92AA93EE505A27266A67229E /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "Brand Assets";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "AVCam/noirca-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.xxiivv.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = noirca;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
@@ -390,12 +390,13 @@
 			baseConfigurationReference = 959CDB71DCC8D1E0145AA011 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "Brand Assets";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "AVCam/noirca-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.xxiivv.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = noirca;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;

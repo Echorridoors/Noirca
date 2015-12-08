@@ -313,11 +313,6 @@
     return false;
 }
 
-- (NSUInteger)supportedInterfaceOrientations
-{
-	return UIInterfaceOrientationMaskPortrait;
-}
-
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
 	[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
